@@ -1,0 +1,86 @@
+﻿@if (PaginasTotales != 0)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @foreach (var enlace in enlaces)
+            {
+            <li @onclick="@(()=> PaginaSeleccionadaInterno(enlace))"
+                style="@(enlace.Habilitada ? "cursor:pointer": null);"
+                class="page-item @(enlace.Habilitada ? null: "disabled") @(enlace.Activa ? "active" : null)">
+                <span class="page-link" href="#">@enlace.Texto</span>
+            </li>
+            }
+        </ul>
+    </nav>
+}
+
+@code {
+    [Parameter] public int PaginaActual { get; set; } = 1;
+    [Parameter] public int PaginasTotales { get; set; }
+    [Parameter] public int Radio { get; set; } = 3;
+    [Parameter] public EventCallback<int> PaginaSeleccionada { get; set; }
+
+    List<PaginasNodel> enlaces;  /*= new List<PaginasNodel>();*/
+
+    protected override void OnParametersSet()
+    {
+        enlaces = new List<PaginasNodel>();
+
+        var enlaceAnteriorHabilitado = PaginaActual != 1;
+        var enlaceAnterior = PaginaActual - 1;
+
+        enlaces.Add(new PaginasNodel(1, enlaceAnteriorHabilitado, "|<"));
+        enlaces.Add(new PaginasNodel(enlaceAnterior, enlaceAnteriorHabilitado, "<"));
+
+        for (int i = 1; i <= PaginasTotales; i++)
+        {
+            if (i >= PaginaActual - Radio && i <= PaginaActual + Radio)
+            {
+                enlaces.Add(new PaginasNodel(i) { Activa = PaginaActual == i}) ;
+            }
+        }
+
+        var enlaceSiguienteHabilitado = PaginaActual != PaginasTotales;
+        var enlaceSiguiente = PaginaActual + 1;
+        enlaces.Add(new PaginasNodel(enlaceSiguiente, enlaceSiguienteHabilitado, ">"));
+        enlaces.Add(new PaginasNodel(PaginasTotales, enlaceSiguienteHabilitado, ">|"));
+    }
+
+    private async Task PaginaSeleccionadaInterno(PaginasNodel paginasNodel)
+    {
+        if (paginasNodel.Pagina == PaginaActual)
+        {
+            return;
+        }
+
+        if (!paginasNodel.Habilitada)
+        {
+            return;
+        }
+
+        await PaginaSeleccionada.InvokeAsync(paginasNodel.Pagina);
+    }
+
+    class PaginasNodel
+    {
+        public PaginasNodel(int pagina)
+            : this(pagina, true)
+        { }
+
+        public PaginasNodel(int pagina, bool habilitada)
+            : this(pagina, habilitada, pagina.ToString())
+        { }
+
+        public PaginasNodel(int pagina, bool habilitada, string texto)
+        {
+            Pagina = pagina;
+            Habilitada = habilitada;
+            Texto = texto;
+        }
+
+        public string Texto { get; set; }
+        public int Pagina { get; set; }
+        public bool Habilitada { get; set; } = true;
+        public bool Activa { get; set; } = false;
+    }
+}

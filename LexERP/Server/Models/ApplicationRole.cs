@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace LexERP.Server.Models
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationRole : IdentityRole
     {
-        public ApplicationUser()
+        public ApplicationRole()
         {
         }
 
-        public ApplicationUser(string userName) : base(userName)
+        public ApplicationRole(string roleName) : base(roleName)
         {
         }
     }

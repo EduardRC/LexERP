@@ -1,0 +1,206 @@
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@attribute [Authorize(Roles = "admin")]
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Usuario" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12 col-lg-8 col-xl-6">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Usuario.Nombre" />
+                        <ValidationMessage For="@(() => Usuario.Nombre)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Apellidos:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Usuario.Apellidos" />
+                        <ValidationMessage For="@(() => Usuario.Apellidos)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Iniciales:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Usuario.Iniciales" />
+                        <ValidationMessage For="@(() => Usuario.Iniciales)" />
+                    </div>
+                </div>
+                @if (!ModoEdicion)
+                {
+                    <div class="form-group">
+                        <label>E-mail:</label>
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Usuario.Email" />
+                            <ValidationMessage For="@(() => Usuario.Email)" />
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <label>Nueva contraseña:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Usuario.Password" />
+                        <ValidationMessage For="@(() => Usuario.Password)" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Rol del usuario:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Usuario.rolName">
+                            @foreach (var rol in roles)
+                            {
+                                <option value="@rol.Nombre">@rol.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Departamento asignado:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Usuario.Departamento.Id">
+                            @foreach (var departamento in departamentos)
+                            {
+                                <option value="@departamento.Id">@departamento.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria usuario:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Usuario.Categoria.Id">
+                            @foreach (var categoria in categorias)
+                            {
+                                <option value="@categoria.Id">@categoria.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                @*<div class="form-group">
+            <label>Grupos:</label>
+            <div>
+                <SelectorMultiple Seleccionados="Seleccionados" NoSeleccionados="NoSeleccionados" />
+            </div>
+        </div>*@
+
+            </div>
+            <div class="col-sm-12 col-lg-4 col-xl-6">
+                <label>
+                    Marque donde quiera que aparezca este usuario disponible para su selección.
+                </label>
+
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Usuario.EsSocio" />
+                        <ValidationMessage For="@(() => Usuario.EsSocio)" />
+                    </div>
+                    &nbsp; <label>Socio</label>
+                </div>
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Usuario.EsResponsableExpediente" />
+                        <ValidationMessage For="@(() => Usuario.EsResponsableExpediente)" />
+                    </div>
+                    &nbsp; <label>Responsable expediente</label>
+                </div>
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Usuario.EsResponsableFacturacion" />
+                        <ValidationMessage For="@(() => Usuario.EsResponsableFacturacion)" />
+                    </div>
+                    &nbsp; <label>Responsable facturación</label>
+                </div>
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Usuario.EsResponsableComercial" />
+                        <ValidationMessage For="@(() => Usuario.EsResponsableComercial)" />
+                    </div>
+                    &nbsp; <label>Responsable comercial</label>
+                </div>
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Usuario.EsCaptadorComisionista" />
+                        <ValidationMessage For="@(() => Usuario.EsCaptadorComisionista)" />
+                    </div>
+                    &nbsp; <label>Captador / Comisionista</label>
+                </div>
+            </div>
+
+        </div>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public UsuarioDTO Usuario { get; set; }
+    [Parameter] public Boolean ModoEdicion { get; set; } = false;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private bool inicializado = false;
+
+    private List<RolDTO> roles;
+    private List<DepartamentoDTOmin> departamentos;
+    private List<CategoriaDTOmin> categorias;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await CargarRoles();
+        await CargarDepartamentos();
+        await CargarCategorias();
+
+        inicializado = true;
+    }
+
+    private async Task CargarRoles()
+    {
+        var httpResponse = await repositorio.Get<List<RolDTO>>("api/usuarios/roles");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            roles = httpResponse.Response;
+        }
+    }
+
+    private async Task CargarDepartamentos()
+    {
+        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>("api/departamentos/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            departamentos = httpResponse.Response;
+        }
+    }
+
+    private async Task CargarCategorias()
+    {
+        var httpResponse = await repositorio.Get<List<CategoriaDTOmin>>("api/categorias/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            categorias = httpResponse.Response;
+        }
+    }
+}

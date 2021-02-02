@@ -1,3 +1,5 @@
+using LexERP.Client.Helpers;
+using LexERP.Client.Repositorios;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -24,9 +26,18 @@ namespace LexERP.Client
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("LexERP.ServerAPI"));
 
-            builder.Services.AddApiAuthorization();
+            ConfigureServices(builder.Services);
 
             await builder.Build().RunAsync();
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddScoped<IRepositorio, Repositorio>();
+            services.AddScoped<IMostrarMensajes, MostrarMensajes>();
+
+            services.AddAuthorizationCore();
+            services.AddApiAuthorization();
         }
     }
 }

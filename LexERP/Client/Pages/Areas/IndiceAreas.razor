@@ -1,0 +1,86 @@
+﻿@page "/areas"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@*@attribute [Authorize(Roles = "admin")]*@
+
+<h3 class="text-corporativo">Indice Areas</h3>
+
+<div>
+    <a href="/areas/crear" class="btn btn-primary">Crear nueva area</a>
+</div>
+
+@*<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada" PaginasTotales="paginasTotales" />
+
+<ListadoGenerico Listado="Clientes">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Judicial</th>
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Clientes)
+                {
+                    <tr>
+                        <td>
+                            <a href="clientes/editar/@item.Id" class="btn btn-success">Editar</a>
+                            <button @onclick="@(()=> BorrarCliente(item))" class="btn btn-danger">Borrar</button>
+                        </td>
+                        <td>@item.Judicial</td>
+                        <td>@item.Codigo</td>
+                        <td>@item.Nombre</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>*@
+
+
+@code {
+    //public List<ClienteDTO> Clientes { get; set; }
+
+    //private int paginaActual = 1;
+    //private int paginasTotales;
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    await Cargar();
+    //}
+
+    //private async Task PaginaSeleccionada(int pagina)
+    //{
+    //    paginaActual = pagina;
+    //    await Cargar(pagina);
+    //}
+
+    //private async Task Cargar(int pagina = 1)
+    //{
+    //    var httpResponse = await repositorio.Get<List<ClienteDTO>>($"api/clientes?pagina={pagina}");
+
+    //    if (!httpResponse.Error)
+    //    {
+    //        Clientes = httpResponse.Response;
+    //        paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
+    //    }
+    //}
+
+    //private async Task BorrarCliente(ClienteDTO cliente)
+    //{
+    //    var httpResponse = await repositorio.Delete($"api/clientes/{cliente.Id}");
+
+    //    if (httpResponse.Error)
+    //    {
+    //        await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+    //    }
+    //    else
+    //    {
+    //        await Cargar();
+    //    }
+    //}
+
+}

@@ -1,0 +1,73 @@
+﻿@page "/usuarios/editar/{UsuarioId:int}"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Editar Usuario</h3>
+<div>
+    <button @onclick="@(()=>EliminarUsuario(usuario.Id))" class="btn btn-primary">Borrar usuario</button>
+    <br />
+    <br />
+</div>
+
+@if (usuario==null)
+{
+    <Cargando />
+}
+else
+{
+    <FormularioUsuario Usuario="usuario"
+                       ModoEdicion=true
+                       OnValidSubmit="Editar" />
+}
+
+
+@code {
+    [Parameter] public int UsuarioId { get; set; }
+
+    private UsuarioDTO usuario;
+    private bool inicializado = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<UsuarioDTO>($"api/usuarios/{UsuarioId}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            usuario = httpResponse.Response;
+        }
+    }
+
+    private async Task Editar()
+    {
+        var httpResponse = await repositorio.Put("api/usuarios", usuario);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/usuarios");
+        }
+    }
+
+    private async Task EliminarUsuario(int usuarioId)
+    {
+        var httpResponse = await repositorio.Delete($"api/usuarios/{usuarioId}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/usuarios");
+        }
+    }
+}

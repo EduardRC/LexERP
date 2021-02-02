@@ -1,0 +1,91 @@
+﻿@page "/usuarios"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+
+
+<h3 class="text-corporativo">Listado de usuarios</h3>
+
+<div>
+    <a href="/usuarios/crear" class="btn btn-primary">Crear nuevo usuario</a>
+    <br />
+    <br />
+</div>
+
+<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"
+            PaginasTotales="paginasTotales" />
+
+<ListadoGenerico Listado="usuarios">
+    <NoHayRegistros>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Departamento</th>
+                    <th>Categoria</th>
+                </tr>
+            </thead>
+        </table>
+        <br />
+        <text>No hay registros para mostrar</text>
+    </NoHayRegistros>
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Departamento</th>
+                    <th>Categoria</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in usuarios)
+                {
+                <tr @onclick="@(()=>EditarUsuario(usuario.Id))" style="cursor:pointer;">
+                    <td>@usuario.Nombre</td>
+                    <td>@usuario.Departamento</td>
+                    <td>@usuario.Categoria</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    List<UsuarioDTOlist> usuarios;
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await Cargar(pagina);
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar(int pagina = 1)
+    {
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios?pagina={pagina}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            usuarios = httpResponse.Response;
+        }
+    }
+
+    private async Task EditarUsuario(int usuarioId)
+    {
+        navigationManager.NavigateTo($"usuarios/editar/{usuarioId}");
+    }
+
+}

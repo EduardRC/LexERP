@@ -4,14 +4,16 @@ using LexERP.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LexERP.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210129150613_bd-inicial")]
+    partial class bdinicial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1830,7 +1832,7 @@ namespace LexERP.Server.Data.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
-                    b.Property<int?>("CategoriaId")
+                    b.Property<int>("CategoriaId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreadoFecha")
@@ -1839,7 +1841,7 @@ namespace LexERP.Server.Data.Migrations
                     b.Property<int>("CreadoPor")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DepartamentoId")
+                    b.Property<int>("DepartamentoId")
                         .HasColumnType("int");
 
                     b.Property<bool>("Eliminado")
@@ -2519,11 +2521,15 @@ namespace LexERP.Server.Data.Migrations
                 {
                     b.HasOne("LexERP.Shared.Entities.Categoria", "Categoria")
                         .WithMany()
-                        .HasForeignKey("CategoriaId");
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("LexERP.Shared.Entities.Departamento", "Departamento")
                         .WithMany("Usuarios")
-                        .HasForeignKey("DepartamentoId");
+                        .HasForeignKey("DepartamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("LexERP.Shared.Entities.Expediente", null)
                         .WithMany("Usuarios")

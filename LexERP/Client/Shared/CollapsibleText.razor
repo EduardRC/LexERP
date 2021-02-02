@@ -1,0 +1,25 @@
+﻿<div class="row">
+    <a @onclick="@Toggle" style="cursor:pointer">
+        @if (Collapsed)
+        {
+            <p style="white-space: pre-line; max-height:@($"{LinesCollapsed}em"); overflow:hidden">@Text</p>
+            <span class="oi oi-caret-bottom" aria-hidden="true"></span>
+        }
+        else
+        {
+            <p style="white-space: pre-line">@Text</p>
+            <span class="oi oi-caret-top" aria-hidden="true"></span>
+        }
+    </a>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; }
+    [Parameter] public int LinesCollapsed { get; set; } = 3;
+    [Parameter] public bool Collapsed { get; set; } = true;
+
+    void Toggle()
+    {
+        Collapsed = !Collapsed;
+    }
+}

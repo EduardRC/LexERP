@@ -16,4 +16,24 @@
     <ProjectReference Include="..\Shared\LexERP.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Categorias\" />
+    <Folder Include="Pages\Clientes\" />
+    <Folder Include="Pages\Contactos\" />
+    <Folder Include="Pages\Empresas\" />
+    <Folder Include="Pages\Expedientes\" />
+    <Folder Include="Pages\Facturas\" />
+    <Folder Include="Pages\FormasDePago\" />
+    <Folder Include="Pages\Idiomas\" />
+    <Folder Include="Pages\TipoContactos\" />
+    <Folder Include="Pages\TipoExpedientes\" />
+    <Folder Include="Pages\TipoContratos\" />
+    <Folder Include="Pages\TipoActuaciones\" />
+    <Folder Include="Pages\Tarifas\" />
+    <Folder Include="Pages\Sectores\" />
+    <Folder Include="Pages\Servicios\" />
+    <Folder Include="Pages\Proveedores\" />
+    <Folder Include="Pages\Paises\" />
+  </ItemGroup>
+
 </Project>
