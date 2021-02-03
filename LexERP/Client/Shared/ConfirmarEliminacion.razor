@@ -1,0 +1,15 @@
+﻿<h3>Eliminación de registro</h3>
+<hr />
+<br />
+<h4>@Texto</h4>
+<br />
+<button @onclick="Yes" class="btn btn-primary">Si</button>
+<button @onclick="No" class="btn btn-secondary">No</button>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Texto { get; set; } = "";
+
+    async Task Yes() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task No() => await BlazoredModal.CancelAsync();
+}

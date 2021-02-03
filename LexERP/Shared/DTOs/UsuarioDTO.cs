@@ -54,5 +54,6 @@ namespace LexERP.Shared.DTOs
         public string Nombre { get; set; }
         public string Departamento { get; set; }
         public string Categoria { get; set; }
+        public bool Activo { get; set; }
     }
 }

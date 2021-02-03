@@ -12,6 +12,8 @@ using LexERP.Server.Helpers;
 using LexERP.Server.Models;
 using LexERP.Shared.DTOs;
 using LexERP.Shared.Entities;
+using IdentityServer4.Models;
+using IdentityModel;
 
 namespace LexERP.Server.Controllers
 {
@@ -35,17 +37,55 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UsuarioDTOlist>>> Get([FromQuery] PaginacionDTO paginacion)
+        public async Task<ActionResult<List<UsuarioDTOlist>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
             var queryable = _context.Usuarios.Where(x=>x.Eliminado==false).AsQueryable();
-            await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, paginacion.CantidadRegistros);
-            return await queryable.Paginar(paginacion)
+
+            if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
+            {
+                var searchString = parametrosBusqueda.Buscar.ToLower();
+
+                queryable = queryable
+                    .Where(x => x.Nombre.ToLower().Contains(searchString) ||
+                                x.Departamento.Descripcion.ToLower().Contains(searchString) ||
+                                x.Categoria.Descripcion.ToLower().Contains(searchString));
+            }
+
+            if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
+            {
+                switch (parametrosBusqueda.Orden.ToLower())
+                {
+                    case "nombre":
+                        queryable = queryable.OrderBy(s => s.Apellidos).ThenBy(s => s.Nombre);
+                        break;
+                    case "departamento":
+                        queryable = queryable.OrderBy(s => s.Departamento.Descripcion);
+                        break;
+                    case "departamento_desc":
+                        queryable = queryable.OrderByDescending(s => s.Departamento.Descripcion);
+                        break;
+                    case "categoria":
+                        queryable = queryable.OrderBy(s => s.Categoria.Descripcion);
+                        break;
+                    case "categoria_desc":
+                        queryable = queryable.OrderByDescending(s => s.Categoria.Descripcion);
+                        break;
+                    default:
+                        queryable = queryable.OrderByDescending(s => s.Apellidos).ThenByDescending(s => s.Nombre);
+                        break;
+                }
+            }
+
+            await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
+            
+            return await queryable.Paginar(parametrosBusqueda.Paginacion)
                 .Select(x => new UsuarioDTOlist
             {
                 Id = x.Id,
                 Nombre = x.FullName,
                 Departamento = x.Departamento.Descripcion,
-                Categoria = x.Categoria.Descripcion
+                Categoria = x.Categoria.Descripcion,
+                Activo = x.Activo
                 }).ToListAsync();
         }
 
@@ -136,8 +176,8 @@ namespace LexERP.Server.Controllers
         public async Task<ActionResult> Post(UsuarioDTO usuarioDTO)
         {
             // crear usuario en Identity
-            var user = new ApplicationUser { UserName = usuarioDTO.Email, Email = usuarioDTO.Email };
-            var ir = await _userManager.CreateAsync(user, usuarioDTO.Password);
+            var applicationUser = new ApplicationUser { UserName = usuarioDTO.Email, Email = usuarioDTO.Email };
+            var ir = await _userManager.CreateAsync(applicationUser, usuarioDTO.Password);
 
             if (ir.Succeeded)
             {
@@ -158,7 +198,8 @@ namespace LexERP.Server.Controllers
                     EsResponsableComercial = usuarioDTO.EsResponsableComercial,
                     EsCaptadorComisionista = usuarioDTO.EsCaptadorComisionista,
                     Activo = true,
-                    CreadoFecha = DateTime.Now
+                    CreadoFecha = DateTime.Now,
+                    CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
                 };
 
                 if (usuarioDTO.Departamento.Id!=0)
@@ -170,10 +211,11 @@ namespace LexERP.Server.Controllers
                 {
                     usuario.CategoriaId = usuarioDTO.Categoria.Id;
                 }
-                
-
 
                 _context.Add(usuario);
+                await _context.SaveChangesAsync();
+
+                applicationUser.UsuarioId = usuario.Id;
                 await _context.SaveChangesAsync();
 
                 return NoContent();
@@ -192,32 +234,66 @@ namespace LexERP.Server.Controllers
 
             if (usuario == null) { return NotFound(); }
 
-            var user = _userManager.FindByNameAsync(usuarioDTO.Email).Result;
-            var roles = await _userManager.GetRolesAsync(user);
+            var applicationUser = _userManager.FindByNameAsync(usuario.Email).Result;
+            var roles = await _userManager.GetRolesAsync(applicationUser);
 
             // si hay nueva contraseña, borrar la anterior y asignar la nueva
             if (!string.IsNullOrEmpty(usuarioDTO.Password))
             {
-                await _userManager.RemovePasswordAsync(user);
-                await _userManager.AddPasswordAsync(user, usuarioDTO.Password);
+                await _userManager.RemovePasswordAsync(applicationUser);
+                await _userManager.AddPasswordAsync(applicationUser, usuarioDTO.Password);
             }
 
             // si ha varido el rol, eliminar anteriores y asignar el nuevo
             if (roles.First() != usuarioDTO.rolName)
             {
-                await _userManager.RemoveFromRolesAsync(user, roles);
-                await _userManager.AddToRoleAsync(user, usuarioDTO.rolName);
+                await _userManager.RemoveFromRolesAsync(applicationUser, roles);
+                await _userManager.AddToRoleAsync(applicationUser, usuarioDTO.rolName);
+            }
+
+            // Si ha variado el estado de "activo", bloquear o desbloquear usuario
+            if (usuario.Activo!=usuarioDTO.Activo)
+            {
+                if (usuarioDTO.Activo)
+                {
+                    applicationUser.LockoutEnd = null;
+                }
+                else
+                {
+                    applicationUser.LockoutEnd = DateTime.MaxValue;
+                }
+            }
+
+            // Si ha variado el email, modificarlo para inicio sesion
+            if (usuario.Email.Trim().ToLower() != usuarioDTO.Email.Trim().ToLower())
+            {
+                var usernameResult = await _userManager.SetUserNameAsync(applicationUser, usuarioDTO.Email.Trim().ToLower());
+
+                if (!usernameResult.Succeeded)
+                {
+                    return Conflict("No se puede modificar el usuario con este email");
+                }
+
+                var emailResult = await _userManager.SetEmailAsync(applicationUser, usuarioDTO.Email.Trim().ToLower());
+
+                if (!usernameResult.Succeeded)
+                {
+                    return Conflict("No se puede modificar el usuario con este email");
+                }
             }
 
             usuario.Nombre = usuarioDTO.Nombre;
             usuario.Apellidos = usuarioDTO.Apellidos;
             usuario.Iniciales = usuarioDTO.Iniciales;
+            usuario.Email = usuarioDTO.Email.Trim().ToLower();
             usuario.EsSocio = usuarioDTO.EsSocio;
             usuario.EsResponsableExpediente = usuarioDTO.EsResponsableExpediente;
             usuario.EsResponsableFacturacion = usuarioDTO.EsResponsableFacturacion;
             usuario.EsResponsableComercial = usuarioDTO.EsResponsableComercial;
             usuario.EsCaptadorComisionista = usuarioDTO.EsCaptadorComisionista;
+            usuario.Activo = usuarioDTO.Activo;
             usuario.ModificadoFecha = DateTime.Now;
+            usuario.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
 
             if (usuarioDTO.Departamento.Id != 0)
             {

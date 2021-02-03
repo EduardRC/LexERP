@@ -2,6 +2,7 @@
 @inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 @inject NavigationManager navigationManager
+@inject IJSRuntime js
 @attribute [Authorize(Roles = "admin")]
 
 
@@ -13,10 +14,35 @@
     <br />
 </div>
 
+<div class="row">
+    <div class="col-xs-12 col-sm-8 col-xl-9">
+        <input @bind-value="searchString" @bind-value:event="oninput"
+               @onkeypress="@((KeyboardEventArgs e) => SearchStringKeyPress(e))"
+               type="text" class="form-control" id="searchString" placeholder="Escriba aquí el texto a buscar" />
+    </div>
+
+    <div class="col-xs-8 col-sm-2">
+        <button type="button" class="btn btn-primary" @onclick="LimpiarOnClick">Limpiar busqueda</button>
+    </div>
+
+    <div class="col-xs-4 col-sm-2 col-xl-1">
+        <select class="form-control"
+                value="@registrosPorPagina"
+                @onchange="ModificarRegistrosAVisualizar"
+                title="Registros por página">
+            <option value=10>10</option>
+            <option value=20>20</option>
+            <option value=50>50</option>
+        </select>
+    </div>
+</div>
+
+<br />
+
 <Paginacion PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"
             PaginasTotales="paginasTotales" />
 
-<ListadoGenerico Listado="usuarios">
+<ListadoGenerico Listado="lista">
     <NoHayRegistros>
         <table class="table table-striped">
             <thead>
@@ -34,19 +60,67 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Departamento</th>
-                    <th>Categoria</th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("nombre"))" style="cursor:pointer">
+                            Nombre
+                            @if (sortOrder == "nombre_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "nombre")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("departamento"))" style="cursor:pointer">
+                            Departamento
+                            @if (sortOrder == "departamento_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "departamento")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("categoria"))" style="cursor:pointer">
+                            Categoria
+                            @if (sortOrder == "categoria_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "categoria")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var usuario in usuarios)
+                @foreach (var usuario in lista)
                 {
-                <tr @onclick="@(()=>EditarUsuario(usuario.Id))" style="cursor:pointer;">
-                    <td>@usuario.Nombre</td>
-                    <td>@usuario.Departamento</td>
-                    <td>@usuario.Categoria</td>
-                </tr>
+                    <tr @onclick="@(()=>EditarRegistro(usuario.Id))" style="cursor:pointer;">
+                        <td>@usuario.Nombre</td>
+                        <td>@usuario.Departamento</td>
+                        <td>@usuario.Categoria</td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -54,24 +128,124 @@
 </ListadoGenerico>
 
 @code {
-    List<UsuarioDTOlist> usuarios;
+    List<UsuarioDTOlist> lista;
+
+    string searchString = "";
+
+    Dictionary<string, string> queryStringsDict;
+
     private int paginaActual = 1;
     private int paginasTotales;
+    private string sortOrder = "nombre_desc";
+    public int registrosPorPagina = 10;
+
+    protected async override Task OnInitializedAsync()
+    {
+        // cargar valores del Local Storage del numero de paginas y ultima configuracion de la busqueda
+        await CargarStorage();
+
+        var url = navigationManager.Uri;
+        var queries = navigationManager.ObtenerQueryStrings(url);
+
+        if (queries == null)
+        {
+            await RealizarBusqueda(GenerarQueryStrings());
+        }
+        else
+        {
+            queryStringsDict = queries;
+            LlenarCampos();
+            var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
+            await RealizarBusqueda(queryStrings);
+        }
+    }
+
+    private async Task CargarStorage()
+    {
+        var storageRegistrosPorPagina = await js.GetFromLocalStorage("REGISTROSPORPAGINA");
+
+        if (!string.IsNullOrEmpty(storageRegistrosPorPagina))
+        {
+            int.TryParse(storageRegistrosPorPagina, out registrosPorPagina);
+        }
+
+        var storageSortOrder = await js.GetFromSessionStorage("SORTORDER");
+        if (!string.IsNullOrEmpty(storageSortOrder))
+        {
+            sortOrder = storageSortOrder;
+        }
+
+        var storageSearchString = await js.GetFromSessionStorage("SEARCHSTRING");
+        if (!string.IsNullOrEmpty(storageSearchString))
+        {
+            searchString = storageSearchString;
+        }
+
+        var storagePaginaActual = await js.GetFromSessionStorage("PAGINAACTUAL");
+        if (!string.IsNullOrEmpty(storagePaginaActual))
+        {
+            int.TryParse(storagePaginaActual, out paginaActual);
+        }
+    }
+
+    private async Task GuardarStorage()
+    {
+        await js.SetInSessionStorage("SORTORDER", sortOrder);
+        await js.SetInSessionStorage("SEARCHSTRING", searchString);
+        await js.SetInSessionStorage("PAGINAACTUAL", paginaActual.ToString());
+    }
+
+    private void LlenarCampos()
+    {
+        if (queryStringsDict.ContainsKey("buscar"))
+        {
+            searchString = queryStringsDict["buscar"];
+        }
+        if (queryStringsDict.ContainsKey("pagina"))
+        {
+            int.TryParse(queryStringsDict["pagina"], out paginaActual);
+        }
+        if (queryStringsDict.ContainsKey("orden"))
+        {
+            sortOrder = queryStringsDict["orden"];
+        }
+        if (queryStringsDict.ContainsKey("registros"))
+        {
+            var registros = 10;
+
+            int.TryParse(queryStringsDict["registros"], out registros);
+
+            if (registros <= 10) { registrosPorPagina = 10; }
+            else if (registros <= 20) { registrosPorPagina = 20; }
+            else { registrosPorPagina = 50; }
+        }
+    }
 
     private async Task PaginaSeleccionada(int pagina)
     {
         paginaActual = pagina;
-        await Cargar(pagina);
+        await CargarSeleccion();
     }
 
-    protected async override Task OnInitializedAsync()
+    private async Task SearchStringKeyPress(KeyboardEventArgs e)
     {
-        await Cargar();
+        if (e.Key == "Enter")
+        {
+            paginaActual = 1;
+            await CargarSeleccion();
+        }
     }
 
-    private async Task Cargar(int pagina = 1)
+    private async Task CargarSeleccion()
     {
-        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios?pagina={pagina}");
+        var queryStrings = GenerarQueryStrings();
+
+        await RealizarBusqueda(queryStrings);
+    }
+
+    private async Task RealizarBusqueda(string queryStrings)
+    {
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios?" + queryStrings);
 
         if (httpResponse.Error)
         {
@@ -79,13 +253,78 @@
         }
         else
         {
-            usuarios = httpResponse.Response;
+            lista = httpResponse.Response;
+            paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
         }
     }
 
-    private async Task EditarUsuario(int usuarioId)
+    private string GenerarQueryStrings()
     {
-        navigationManager.NavigateTo($"usuarios/editar/{usuarioId}");
+        if (queryStringsDict == null)
+        {
+            queryStringsDict = new Dictionary<string, string>();
+        }
+
+        queryStringsDict["buscar"] = searchString;
+        queryStringsDict["pagina"] = paginaActual.ToString();
+        queryStringsDict["registros"] = registrosPorPagina.ToString();
+        queryStringsDict["orden"] = sortOrder;
+
+        var valoresPorDefecto = new List<string>() { "false", "", "0" };
+
+        // generaremos una cadena de parametros para pasar en la url del tipo:
+        // pagina=7&buscar=spider ...
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !valoresPorDefecto.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
     }
 
+    private async Task LimpiarOnClick()
+    {
+        searchString = "";
+        paginaActual = 1;
+
+        await GuardarStorage();
+
+        await CargarSeleccion();
+    }
+
+    private async Task ModificarRegistrosAVisualizar(ChangeEventArgs args)
+    {
+        int.TryParse(args.Value.ToString(), out registrosPorPagina);
+
+        // Guardar información en Local Storage para proximos accesos
+        await js.SetInLocalStorage("REGISTROSPORPAGINA", registrosPorPagina.ToString());
+
+        paginaActual = 1;
+        await CargarSeleccion();
+    }
+
+    private async Task NuevoOrdenamiento(string campo)
+    {
+        switch (campo)
+        {
+            case "nombre":
+                sortOrder = "nombre" + ((sortOrder == "nombre") ? "_desc" : "");
+                break;
+            case "departamento":
+                sortOrder = "departamento" + ((sortOrder == "departamento") ? "_desc" : "");
+                break;
+            case "categoria":
+                sortOrder = "categoria" + ((sortOrder == "categoria") ? "_desc" : "");
+                break;
+        }
+
+        await GuardarStorage();
+
+        paginaActual = 1;
+        await CargarSeleccion();
+    }
+
+    private async Task EditarRegistro(int id)
+    {
+        await GuardarStorage();
+        navigationManager.NavigateTo($"usuarios/editar/{id}");
+    }
 }

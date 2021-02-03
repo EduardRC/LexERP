@@ -4,19 +4,20 @@
 @inject NavigationManager navigationManager
 @attribute [Authorize(Roles = "admin")]
 
-<h3>Editar Usuario</h3>
-<div>
-    <button @onclick="@(()=>EliminarUsuario(usuario.Id))" class="btn btn-primary">Borrar usuario</button>
-    <br />
-    <br />
-</div>
 
-@if (usuario==null)
+@if (usuario == null)
 {
     <Cargando />
 }
 else
 {
+    <h3>Editar @usuario.FullName2</h3>
+    <div>
+        <button @onclick="@(()=>EliminarUsuario(usuario.Id))" class="btn btn-primary">Borrar usuario</button>
+        <br />
+        <br />
+    </div>
+
     <FormularioUsuario Usuario="usuario"
                        ModoEdicion=true
                        OnValidSubmit="Editar" />
@@ -24,6 +25,8 @@ else
 
 
 @code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
     [Parameter] public int UsuarioId { get; set; }
 
     private UsuarioDTO usuario;
@@ -59,15 +62,31 @@ else
 
     private async Task EliminarUsuario(int usuarioId)
     {
-        var httpResponse = await repositorio.Delete($"api/usuarios/{usuarioId}");
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar el usuario {usuario.FullName2}?");
 
-        if (httpResponse.Error)
+        var options = new ModalOptions()
         {
-            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
-        }
-        else
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var confirmationModal = Modal.Show<ConfirmarEliminacion>("", parameters, options);
+        var result = await confirmationModal.Result;
+
+        if (!result.Cancelled)
         {
-            navigationManager.NavigateTo("/usuarios");
+            var httpResponse = await repositorio.Delete($"api/usuarios/{usuarioId}");
+
+            if (httpResponse.Error)
+            {
+                await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+            }
+            else
+            {
+                navigationManager.NavigateTo("/usuarios");
+            }
         }
     }
 }

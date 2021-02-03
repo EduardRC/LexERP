@@ -9,6 +9,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using LexERP.Server.Models;
+using LexERP.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LexERP.Server.Helpers
 {
@@ -42,6 +44,10 @@ namespace LexERP.Server.Helpers
             }
 
             claims.AddRange(claimsMapeados);
+
+            // guardar id del usuario para poder utilizarlo al guardar logs de actividad, 
+            // sin tener que consultarlo cada vez a la BD
+            claims.Add(new Claim(JwtClaimTypes.Id, usuario.UsuarioId.ToString()));
 
             context.IssuedClaims = claims;
         }

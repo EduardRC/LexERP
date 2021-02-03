@@ -12,6 +12,18 @@ else
         <DataAnnotationsValidator />
         <div class="row">
             <div class="col-sm-12 col-lg-8 col-xl-6">
+
+                @if (ModoEdicion)
+                {
+                    <div class="form-inline">
+                        <div>
+                            <InputCheckbox class="form-control" @bind-Value="@Usuario.Activo" />
+                            <ValidationMessage For="@(() => Usuario.Activo)" />
+                        </div>
+                        &nbsp; <label>Usuario activo</label>
+                    </div>
+                }
+
                 <div class="form-group">
                     <label>Nombre:</label>
                     <div>
@@ -33,35 +45,27 @@ else
                         <ValidationMessage For="@(() => Usuario.Iniciales)" />
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>E-mail:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Usuario.Email" />
+                        <ValidationMessage For="@(() => Usuario.Email)" />
+                    </div>
+                </div>
                 @if (!ModoEdicion)
                 {
                     <div class="form-group">
-                        <label>E-mail:</label>
+                        <label>Contraseña:</label>
                         <div>
-                            <InputText class="form-control" @bind-Value="@Usuario.Email" />
-                            <ValidationMessage For="@(() => Usuario.Email)" />
+                            <InputText class="form-control" @bind-Value="@Usuario.Password" />
+                            <ValidationMessage For="@(() => Usuario.Password)" />
                         </div>
                     </div>
                 }
-                <div class="form-group">
-                    <label>Nueva contraseña:</label>
-                    <div>
-                        <InputText class="form-control" @bind-Value="@Usuario.Password" />
-                        <ValidationMessage For="@(() => Usuario.Password)" />
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Rol del usuario:</label>
-                    <div>
-                        <select class="form-control mb-2 mr-sm-2" @bind="@Usuario.rolName">
-                            @foreach (var rol in roles)
-                            {
-                                <option value="@rol.Nombre">@rol.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                </div>
+                <br />
+                <hr />
+                <br />
 
                 <div class="form-group">
                     <label>Departamento asignado:</label>
@@ -87,6 +91,7 @@ else
                     </div>
                 </div>
 
+
                 @*<div class="form-group">
             <label>Grupos:</label>
             <div>
@@ -96,8 +101,10 @@ else
 
             </div>
             <div class="col-sm-12 col-lg-4 col-xl-6">
+
+
                 <label>
-                    Marque donde quiera que aparezca este usuario disponible para su selección.
+                    Marque donde quiere que aparezca este usuario disponible para su selección.
                 </label>
 
                 <div class="form-inline">
@@ -134,6 +141,22 @@ else
                         <ValidationMessage For="@(() => Usuario.EsCaptadorComisionista)" />
                     </div>
                     &nbsp; <label>Captador / Comisionista</label>
+                </div>
+
+                <br />
+                <hr />
+                <br />
+
+                <div class="form-group">
+                    <label>Rol del usuario:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Usuario.rolName">
+                            @foreach (var rol in roles)
+                            {
+                                <option value="@rol.Nombre">@rol.Nombre</option>
+                            }
+                        </select>
+                    </div>
                 </div>
             </div>
 

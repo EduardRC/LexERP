@@ -15,5 +15,7 @@ namespace LexERP.Server.Models
         public ApplicationUser(string userName) : base(userName)
         {
         }
+
+        public int UsuarioId { get; set; }
     }
 }

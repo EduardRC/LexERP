@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using LexERP.Client.Helpers;
 using LexERP.Client.Repositorios;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -35,6 +36,8 @@ namespace LexERP.Client
         {
             services.AddScoped<IRepositorio, Repositorio>();
             services.AddScoped<IMostrarMensajes, MostrarMensajes>();
+
+            services.AddBlazoredModal();
 
             services.AddAuthorizationCore();
             services.AddApiAuthorization();
