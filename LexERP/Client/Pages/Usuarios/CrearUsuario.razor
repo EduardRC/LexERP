@@ -12,27 +12,27 @@
 }
 else
 {
-    <FormularioUsuario Usuario="usuario"
+    <FormularioUsuario Usuario="item"
                        OnValidSubmit="Crear" />
 }
 
 @code {
-    private UsuarioDTO usuario = new UsuarioDTO();
+    private UsuarioDTO item = new UsuarioDTO();
 
     private bool inicializado = false;
 
     protected override async Task OnInitializedAsync()
     {
-        usuario.rolName = "user";
-        usuario.Departamento = new DepartamentoDTOmin();
-        usuario.Categoria = new CategoriaDTOmin();
+        item.rolName = "user";
+        item.Departamento = new DepartamentoDTOmin();
+        item.Categoria = new CategoriaDTOmin();
 
         inicializado = true;
     }
 
     private async Task Crear()
     {
-        var httpResponse = await repositorio.Post("api/usuarios", usuario);
+        var httpResponse = await repositorio.Post("api/usuarios", item);
 
         if (httpResponse.Error)
         {

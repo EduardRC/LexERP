@@ -13,11 +13,13 @@ namespace LexERP.Shared.DTOs
         public int Id { get; set; }
         public string Descripcion { get; set; }
         public decimal ImporteHoraBase { get; set; }
+        public bool Activo { get; set; }
     }
 
     public class CategoriaDTOmin
     {
         public int Id { get; set; }
         public string Descripcion { get; set; }
+        public bool Activo { get; set; }
     }
 }

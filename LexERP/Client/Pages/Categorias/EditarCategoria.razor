@@ -1,4 +1,4 @@
-﻿@page "/departamentos/editar/{Id:int}"
+﻿@page "/categorias/editar/{Id:int}"
 @inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 @inject NavigationManager navigationManager
@@ -13,14 +13,14 @@ else
 {
     <h3>Editar @item.Descripcion</h3>
     <div>
-        <button @onclick="@(()=>EliminarRegistro(item.Id))" class="btn btn-primary">Borrar departamento</button>
+        <button @onclick="@(()=>EliminarRegistro(item.Id))" class="btn btn-primary">Borrar categoria</button>
         <br />
         <br />
     </div>
 
-    <FormularioDepartamento Item="item"
-                            ModoEdicion="true"
-                            OnValidSubmit="Guardar" />
+    <FormularioCategoria Item="item"
+                          ModoEdicion="true"
+                          OnValidSubmit="Guardar" />
 }
 
 
@@ -29,11 +29,11 @@ else
 
     [Parameter] public int Id { get; set; }
 
-    private DepartamentoDTO item;
+    private CategoriaDTO item;
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await repositorio.Get<DepartamentoDTO>($"api/departamentos/{Id}");
+        var httpResponse = await repositorio.Get<CategoriaDTO>($"api/categorias/{Id}");
 
         if (httpResponse.Error)
         {
@@ -47,7 +47,7 @@ else
 
     private async Task Guardar()
     {
-        var httpResponse = await repositorio.Put("api/departamentos", item);
+        var httpResponse = await repositorio.Put("api/categorias", item);
 
         if (httpResponse.Error)
         {
@@ -55,14 +55,14 @@ else
         }
         else
         {
-            navigationManager.NavigateTo("/departamentos");
+            navigationManager.NavigateTo("/categorias");
         }
     }
 
     private async Task EliminarRegistro(int id)
     {
         var parameters = new ModalParameters();
-        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar el departamento {item.Descripcion.ToUpper()}?");
+        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar la categoria {item.Descripcion.ToUpper()}?");
 
         var options = new ModalOptions()
         {
@@ -76,7 +76,7 @@ else
 
         if (!result.Cancelled)
         {
-            var httpResponse = await repositorio.Delete($"api/departamentos/{id}");
+            var httpResponse = await repositorio.Delete($"api/categorias/{id}");
 
             if (httpResponse.Error)
             {
@@ -84,8 +84,9 @@ else
             }
             else
             {
-                navigationManager.NavigateTo("/departamentos");
+                navigationManager.NavigateTo("/categorias");
             }
         }
     }
 }
+

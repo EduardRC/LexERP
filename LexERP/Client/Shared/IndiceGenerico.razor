@@ -1,0 +1,224 @@
+﻿@typeparam Titem
+@inject NavigationManager navigationManager
+@inject IJSRuntime js
+
+<h3 class="text-corporativo">@((TituloListado!="")?TituloListado:"Listado")</h3>
+
+<div>
+    <a href=@UrlNuevo class="btn btn-primary">Añadir nuevo registro</a>
+    <br />
+    <br />
+</div>
+
+<BuscadorListado TextoBusqueda="@searchString"
+                 RegistrosPorPagina="registrosPorPagina"
+                 Buscar="Buscar"
+                 LimpiarBusqueda="Limpiar"
+                 ModificarRegistrosAVisualizar="RegistrosAVisualizar" />
+
+<br />
+
+<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada"
+            PaginasTotales="PaginasTotales" />
+
+<ListadoGenerico Listado="Listado">
+    <NoHayRegistros>
+        @NoHayRegistros
+    </NoHayRegistros>
+    <HayRegistrosCompleto>
+        @HayRegistrosCompleto
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    [Parameter] public List<Titem> Listado { get; set; }
+    [Parameter] public string RefListado { get; set; }
+    [Parameter] public string SortOrder { get; set; }
+    [Parameter] public string UrlNuevo { get; set; }
+    [Parameter] public string TituloListado { get; set; }
+    [Parameter] public int PaginasTotales { get; set; }
+
+    [Parameter] public EventCallback<string> Busqueda { get; set; }
+
+    [Parameter] public RenderFragment NoHayRegistros { get; set; }
+    [Parameter] public RenderFragment HayRegistrosCompleto { get; set; }
+
+    private string searchString = "";
+
+    Dictionary<string, string> queryStringsDict;
+
+    private int paginaActual = 1;
+    private int registrosPorPagina = 10;
+
+    protected async override Task OnInitializedAsync()
+    {
+        // cargar valores del Local Storage del numero de paginas y ultima configuracion de la busqueda
+
+        await CargarStorage();
+
+        var url = navigationManager.Uri;
+        var queries = navigationManager.ObtenerQueryStrings(url);
+
+        if (queries == null)
+        {
+            await RealizarBusqueda(GenerarQueryStrings());
+        }
+        else
+        {
+            queryStringsDict = queries;
+            LlenarCampos();
+            var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
+            await RealizarBusqueda(queryStrings);
+        }
+    }
+
+    private async Task CargarStorage()
+    {
+        var storageRegistrosPorPagina = await js.GetFromLocalStorage("REGISTROSPORPAGINA");
+
+        if (!string.IsNullOrEmpty(storageRegistrosPorPagina))
+        {
+            int.TryParse(storageRegistrosPorPagina, out registrosPorPagina);
+        }
+
+        var storageSortOrder = await js.GetFromSessionStorage($"{RefListado}_SORTORDER");
+        if (!string.IsNullOrEmpty(storageSortOrder))
+        {
+            SortOrder = storageSortOrder;
+        }
+
+        var storageSearchString = await js.GetFromSessionStorage($"{RefListado}_SEARCHSTRING");
+        if (!string.IsNullOrEmpty(storageSearchString))
+        {
+            searchString = storageSearchString;
+        }
+
+        var storagePaginaActual = await js.GetFromSessionStorage($"{RefListado}_PAGINAACTUAL");
+        if (!string.IsNullOrEmpty(storagePaginaActual))
+        {
+            int.TryParse(storagePaginaActual, out paginaActual);
+        }
+    }
+
+    private async Task GuardarStorage()
+    {
+        await js.SetInSessionStorage($"{RefListado}_SORTORDER", SortOrder);
+        await js.SetInSessionStorage($"{RefListado}_SEARCHSTRING", searchString);
+        await js.SetInSessionStorage($"{RefListado}_PAGINAACTUAL", paginaActual.ToString());
+    }
+
+    private void LlenarCampos()
+    {
+        if (queryStringsDict.ContainsKey("buscar"))
+        {
+            searchString = queryStringsDict["buscar"];
+        }
+        if (queryStringsDict.ContainsKey("pagina"))
+        {
+            int.TryParse(queryStringsDict["pagina"], out paginaActual);
+        }
+        if (queryStringsDict.ContainsKey("orden"))
+        {
+            SortOrder = queryStringsDict["orden"];
+        }
+        if (queryStringsDict.ContainsKey("registros"))
+        {
+            var registros = 10;
+
+            int.TryParse(queryStringsDict["registros"], out registros);
+
+            if (registros <= 10) { registrosPorPagina = 10; }
+            else if (registros <= 20) { registrosPorPagina = 20; }
+            else { registrosPorPagina = 50; }
+        }
+    }
+
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await CargarSeleccion();
+    }
+
+    private async Task Buscar(string texto)
+    {
+        if (searchString != texto)
+        {
+            searchString = texto;
+            paginaActual = 1;
+            await GuardarStorage();
+            await CargarSeleccion();
+        }
+    }
+
+    private async Task CargarSeleccion()
+    {
+        var queryStrings = GenerarQueryStrings();
+
+        await RealizarBusqueda(queryStrings);
+    }
+
+    private async Task RealizarBusqueda(string queryStrings)
+    {
+
+        await Busqueda.InvokeAsync(queryStrings);
+    }
+
+    private string GenerarQueryStrings()
+    {
+        if (queryStringsDict == null)
+        {
+            queryStringsDict = new Dictionary<string, string>();
+        }
+
+        queryStringsDict["buscar"] = searchString;
+        queryStringsDict["pagina"] = paginaActual.ToString();
+        queryStringsDict["registros"] = registrosPorPagina.ToString();
+        queryStringsDict["orden"] = SortOrder;
+
+        var valoresPorDefecto = new List<string>() { "false", "", "0" };
+
+        // generaremos una cadena de parametros para pasar en la url del tipo:
+        // pagina=7&buscar=spider ...
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !valoresPorDefecto.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+    }
+
+    private async Task Limpiar()
+    {
+        searchString = "";
+        paginaActual = 1;
+
+        await GuardarStorage();
+
+        await CargarSeleccion();
+    }
+
+    private async Task RegistrosAVisualizar(int registros)
+    {
+        registrosPorPagina = registros;
+
+        // Guardar información en Local Storage para proximos accesos
+        await js.SetInLocalStorage("REGISTROSPORPAGINA", registrosPorPagina.ToString());
+
+        paginaActual = 1;
+        await CargarSeleccion();
+    }
+
+    public async Task NuevoOrdenamiento(string campo)
+    {
+        SortOrder = campo;
+
+        await GuardarStorage();
+
+        paginaActual = 1;
+        await CargarSeleccion();
+    }
+
+    public async Task EditarRegistro(string url)
+    {
+        await GuardarStorage();
+        navigationManager.NavigateTo($"{url}");
+    }
+}

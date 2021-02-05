@@ -9,6 +9,7 @@ using LexERP.Server.Data;
 using LexERP.Server.Helpers;
 using LexERP.Shared.DTOs;
 using LexERP.Shared.Entities;
+using IdentityModel;
 
 namespace LexERP.Server.Controllers
 {
@@ -25,35 +26,72 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<DepartamentoDTO>>> Get([FromQuery] PaginacionDTO paginacion)
+        public async Task<ActionResult<List<DepartamentoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Departamentos.OrderBy(x=>x.Orden).AsQueryable();
+            var queryable = _context.Departamentos.Where(x => x.Eliminado == false).AsQueryable();
 
-            await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, paginacion.CantidadRegistros);
-
-            return await queryable.Paginar(paginacion).Select(x => new DepartamentoDTO
+            if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
-                Id=x.Id, 
-                Abreviatura=x.Abreviatura, 
-                Descripcion=x.Descripcion, 
-                Orden=x.Orden 
-            }).ToListAsync();
+                var searchString = parametrosBusqueda.Buscar.ToLower();
+
+                queryable = queryable
+                    .Where(x => x.Descripcion.ToLower().Contains(searchString) ||
+                                x.Abreviatura.ToLower().Contains(searchString));
+            }
+
+            if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
+            {
+                switch (parametrosBusqueda.Orden.ToLower())
+                {
+                    case "descripcion_desc":
+                        queryable = queryable.OrderByDescending(s => s.Descripcion);
+                        break;
+                    case "abreviatura":
+                        queryable = queryable.OrderBy(s => s.Abreviatura);
+                        break;
+                    case "abreviatura_desc":
+                        queryable = queryable.OrderByDescending(s => s.Abreviatura);
+                        break;
+                    case "orden":
+                        queryable = queryable.OrderBy(s => s.Orden);
+                        break;
+                    case "orden_desc":
+                        queryable = queryable.OrderByDescending(s => s.Orden);
+                        break;
+                    default:
+                        queryable = queryable.OrderBy(s => s.Descripcion);
+                        break;
+                }
+            }
+
+            await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
+
+            return await queryable.Paginar(parametrosBusqueda.Paginacion)
+                .Select(x => new DepartamentoDTO
+                {
+                    Id = x.Id,
+                    Abreviatura = x.Abreviatura,
+                    Descripcion = x.Descripcion,
+                    Orden = x.Orden,
+                    Activo = x.Activo
+                }).ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartamentoDTO>> Get(int id)
         {
-            var departamento = await _context.Departamentos.Where(x => x.Id == id && x.Eliminado==false)
+            var element = await _context.Departamentos.Where(x => x.Id == id && x.Eliminado==false)
                 .FirstOrDefaultAsync();
 
-            if (departamento == null) { return NotFound(); }
+            if (element == null) { return NotFound(); }
 
             return new DepartamentoDTO
             { 
-                Id = departamento.Id,
-                Abreviatura = departamento.Abreviatura,
-                Descripcion = departamento.Descripcion,
-                Orden = departamento.Orden
+                Id = element.Id,
+                Abreviatura = element.Abreviatura,
+                Descripcion = element.Descripcion,
+                Orden = element.Orden,
+                Activo = element.Activo
             };
         }
 
@@ -61,7 +99,7 @@ namespace LexERP.Server.Controllers
         public async Task<ActionResult<List<DepartamentoDTOmin>>> Get()
         {
             return await _context.Departamentos
-                .Where(x=>x.Eliminado==false)
+                .Where(x=>x.Eliminado==false && x.Activo==true)
                 .OrderBy(x => x.Orden)
                 .Select(x=> new DepartamentoDTOmin
                 {
@@ -72,33 +110,39 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(DepartamentoDTO departamentoDTO)
+        public async Task<ActionResult<int>> Post(DepartamentoDTO elementDTO)
         {
-            var departamento = new Departamento
+            var element = new Departamento
             {
-                Abreviatura = departamentoDTO.Abreviatura,
-                Descripcion = departamentoDTO.Descripcion,
-                Orden = departamentoDTO.Orden
+                Abreviatura = elementDTO.Abreviatura,
+                Descripcion = elementDTO.Descripcion,
+                Orden = elementDTO.Orden,
+                Activo = true,
+                CreadoFecha = DateTime.Now,
+                CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
             };
 
-            _context.Add(departamento);
+            _context.Add(element);
             await _context.SaveChangesAsync();
 
-            return departamento.Id;
+            return element.Id;
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(DepartamentoDTO departamentoDTO)
+        public async Task<ActionResult> Put(DepartamentoDTO elementDTO)
         {
-            var departamento = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == departamentoDTO.Id && x.Eliminado==false);
+            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado==false);
 
-            if (departamento == null) { return NotFound(); }
+            if (element == null) { return NotFound(); }
 
-            departamento.Abreviatura = departamentoDTO.Abreviatura;
-            departamento.Descripcion = departamentoDTO.Descripcion;
-            departamento.Orden = departamentoDTO.Orden;
+            element.Abreviatura = elementDTO.Abreviatura;
+            element.Descripcion = elementDTO.Descripcion;
+            element.Orden = elementDTO.Orden;
+            element.Activo = elementDTO.Activo;
+            element.ModificadoFecha = DateTime.Now;
+            element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
 
-            _context.Attach(departamento).State = EntityState.Modified;
+            _context.Attach(element).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -107,13 +151,18 @@ namespace LexERP.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var departamento = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            // al querer eliminiar el registro, lo que haremos sera deshabilitarlo,
+            // para no perder los enlaces que hay asignados a el,
 
-            if (departamento == null) { return NotFound(); }
+            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
-            departamento.Eliminado = true;
+            if (element == null) { return NotFound(); }
 
-            _context.Attach(departamento).State = EntityState.Modified;
+            element.ModificadoFecha = DateTime.Now;
+            element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
+            element.Eliminado = true;
+
+            _context.Attach(element).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();

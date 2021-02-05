@@ -26,6 +26,8 @@ namespace LexERP.Shared.DTOs
 
         public int Orden { get; set; }
 
+        public bool Activo { get; set; }
+
         //public virtual ICollection<Usuario> Usuarios { get; set; }
     }
 
@@ -34,6 +36,7 @@ namespace LexERP.Shared.DTOs
         public int Id { get; set; }
         public string Abreviatura { get; set; }
         public string Descripcion { get; set; }
+        public bool Activo { get; set; }
     }
 
 }

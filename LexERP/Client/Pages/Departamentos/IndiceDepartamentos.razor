@@ -3,21 +3,18 @@
 @inject IMostrarMensajes mostrarMensajes
 @attribute [Authorize]
 
-<h3 class="text-corporativo">Indice Departamentos</h3>
-
-<div>
-    <a href="/areas/crear" class="btn btn-primary">Crear nuevo departamento</a>
-    <br/>
-</div>
-
-<Paginacion PaginaActual="paginaActual" PaginaSeleccionada="PaginaSeleccionada" PaginasTotales="paginasTotales" />
-
-<ListadoGenerico Listado="Departamentos">
+<IndiceGenerico @ref="child"
+                Listado="listado"
+                SortOrder="@sortOrder"
+                RefListado="departamentos"
+                UrlNuevo="/departamentos/crear"
+                TituloListado="Listado de Departamentos"
+                PaginasTotales="paginasTotales"
+                Busqueda="RealizarBusqueda">
     <NoHayRegistros>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th></th>
                     <th>Abrv.</th>
                     <th>Descripción</th>
                     <th>Orden</th>
@@ -31,20 +28,63 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th></th>
-                    <th>Abrv.</th>
-                    <th>Descripción</th>
-                    <th>Orden</th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("abreviatura"))" style="cursor:pointer">
+                            Abrv.
+                            @if (sortOrder == "abreviatura_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "abreviatura")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("descripcion"))" style="cursor:pointer">
+                            Descripción
+                            @if (sortOrder == "descripcion_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "descripcion")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("orden"))" style="cursor:pointer">
+                            Orden
+                            @if (sortOrder == "orden_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "orden")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Departamentos)
+                @foreach (var item in listado)
                 {
-                    <tr>
-                        <td>
-                            <a href="departamento/editar/@item.Id" class="btn btn-success">Editar</a>
-                            @*<button @onclick="@(()=> BorrarCliente(item))" class="btn btn-danger">Borrar</button>*@
-                        </td>
+                    <tr @onclick="@(()=>EditarRegistro(item.Id))" style="cursor:pointer;">
                         <td>@item.Abreviatura</td>
                         <td>@item.Descripcion</td>
                         <td>@item.Orden</td>
@@ -53,49 +93,54 @@
             </tbody>
         </table>
     </HayRegistrosCompleto>
-</ListadoGenerico>
-
+</IndiceGenerico>
 
 @code {
-    public List<DepartamentoDTO> Departamentos { get; set; }
 
-    private int paginaActual = 1;
-    private int paginasTotales;
+    IndiceGenerico<DepartamentoDTO> child;
 
-    protected override async Task OnInitializedAsync()
+    public List<DepartamentoDTO> listado { get; set; }
+
+    public int paginasTotales { get; set; }
+    string sortOrder = "descripcion";
+
+    public async Task RealizarBusqueda(string queryStrings)
     {
-        await Cargar();
-    }
+        var httpResponse = await repositorio.Get<List<DepartamentoDTO>>($"api/departamentos?" + queryStrings);
 
-    private async Task PaginaSeleccionada(int pagina)
-    {
-        paginaActual = pagina;
-        await Cargar(pagina);
-    }
-
-    private async Task Cargar(int pagina = 1)
-    {
-        var httpResponse = await repositorio.Get<List<DepartamentoDTO>>($"api/departamentos?pagina={pagina}");
-
-        if (!httpResponse.Error)
+        if (httpResponse.Error)
         {
-            Departamentos = httpResponse.Response;
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
             paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
+            listado = httpResponse.Response;
         }
     }
 
-    //private async Task BorrarCliente(ClienteDTO cliente)
-    //{
-    //    var httpResponse = await repositorio.Delete($"api/clientes/{cliente.Id}");
+    private async Task NuevoOrdenamiento(string campo)
+    {
+        switch (campo)
+        {
+            case "abreviatura":
+                sortOrder = "abreviatura" + ((sortOrder == "abreviatura") ? "_desc" : "");
+                break;
+            case "descripcion":
+                sortOrder = "descripcion" + ((sortOrder == "descripcion") ? "_desc" : "");
+                break;
+            case "orden":
+                sortOrder = "orden" + ((sortOrder == "orden") ? "_desc" : "");
+                break;
+        }
 
-    //    if (httpResponse.Error)
-    //    {
-    //        await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
-    //    }
-    //    else
-    //    {
-    //        await Cargar();
-    //    }
-    //}
+        await child.NuevoOrdenamiento(sortOrder);
+    }
+
+    private async Task EditarRegistro(int id)
+    {
+        await child.EditarRegistro($"departamentos/editar/{id}");
+    }
+
 
 }

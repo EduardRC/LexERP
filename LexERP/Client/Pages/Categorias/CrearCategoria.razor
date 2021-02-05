@@ -1,20 +1,20 @@
-﻿@page "/departamentos/crear"
+﻿@page "/categorias/crear"
 @inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 @inject NavigationManager navigationManager
 @attribute [Authorize]
 
-<h3>Crear Departamento</h3>
+<h3>Crear Categoria</h3>
 
-<FormularioDepartamento Item="item"
+<FormularioCategoria Item="item"
                         OnValidSubmit="Crear" />
 
 @code {
-    private DepartamentoDTO item = new DepartamentoDTO();
+    private CategoriaDTO item = new CategoriaDTO();
 
     private async Task Crear()
     {
-        var httpResponse = await repositorio.Post("api/departamentos", item);
+        var httpResponse = await repositorio.Post("api/categorias", item);
 
         if (httpResponse.Error)
         {
@@ -22,8 +22,7 @@
         }
         else
         {
-            navigationManager.NavigateTo("/departamentos");
+            navigationManager.NavigateTo("/categorias");
         }
     }
 }
-

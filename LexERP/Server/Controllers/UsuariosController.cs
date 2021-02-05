@@ -20,7 +20,7 @@ namespace LexERP.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "admin")]
-    public class UsuariosController: ControllerBase
+    public class UsuariosController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -39,7 +39,7 @@ namespace LexERP.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<UsuarioDTOlist>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Usuarios.Where(x=>x.Eliminado==false).AsQueryable();
+            var queryable = _context.Usuarios.Where(x => x.Eliminado == false).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
@@ -55,8 +55,8 @@ namespace LexERP.Server.Controllers
             {
                 switch (parametrosBusqueda.Orden.ToLower())
                 {
-                    case "nombre":
-                        queryable = queryable.OrderBy(s => s.Apellidos).ThenBy(s => s.Nombre);
+                    case "nombre_desc":
+                        queryable = queryable.OrderByDescending(s => s.Apellidos).ThenByDescending(s => s.Nombre);
                         break;
                     case "departamento":
                         queryable = queryable.OrderBy(s => s.Departamento.Descripcion);
@@ -71,29 +71,31 @@ namespace LexERP.Server.Controllers
                         queryable = queryable.OrderByDescending(s => s.Categoria.Descripcion);
                         break;
                     default:
-                        queryable = queryable.OrderByDescending(s => s.Apellidos).ThenByDescending(s => s.Nombre);
+                        queryable = queryable.OrderBy(s => s.Apellidos).ThenBy(s => s.Nombre);
                         break;
                 }
             }
 
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
-            
+
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
                 .Select(x => new UsuarioDTOlist
-            {
-                Id = x.Id,
-                Nombre = x.FullName,
-                Departamento = x.Departamento.Descripcion,
-                Categoria = x.Categoria.Descripcion,
-                Activo = x.Activo
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName,
+                    Departamento = x.Departamento.Descripcion,
+                    Categoria = x.Categoria.Descripcion,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioDTO>> Get(int id)
         {
-            var usuario = await _context.Usuarios.Where(x => x.Id == id && x.Eliminado==false)
-                .FirstOrDefaultAsync();
+            var usuario = await _context.Usuarios.Where(x => x.Id == id && x.Eliminado == false)
+                                .Include(x => x.Departamento)
+                                .Include(x => x.Categoria)
+                                .FirstOrDefaultAsync();
 
             if (usuario == null) { return NotFound(); }
 
@@ -125,12 +127,14 @@ namespace LexERP.Server.Controllers
                     usuarioDTO.Departamento.Id = usuario.Departamento.Id;
                     usuarioDTO.Departamento.Descripcion = usuario.Departamento.Descripcion;
                     usuarioDTO.Departamento.Abreviatura = usuario.Departamento.Abreviatura;
+                    usuarioDTO.Departamento.Activo = usuario.Departamento.Activo;
                 }
 
                 if (usuario.Categoria != null)
                 {
                     usuarioDTO.Categoria.Id = usuario.Categoria.Id;
                     usuarioDTO.Categoria.Descripcion = usuario.Categoria.Descripcion;
+                    usuarioDTO.Categoria.Activo = usuario.Categoria.Activo;
                 }
 
                 return usuarioDTO;
@@ -158,6 +162,7 @@ namespace LexERP.Server.Controllers
 
             usuario.Email = "";
             usuario.ModificadoFecha = DateTime.Now;
+            usuario.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
             usuario.Eliminado = true;
 
             _context.Attach(usuario).State = EntityState.Modified;
@@ -202,12 +207,12 @@ namespace LexERP.Server.Controllers
                     CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
                 };
 
-                if (usuarioDTO.Departamento.Id!=0)
+                if (usuarioDTO.Departamento.Id != 0)
                 {
                     usuario.DepartamentoId = usuarioDTO.Departamento.Id;
                 }
 
-                if (usuarioDTO.Categoria.Id!=0)
+                if (usuarioDTO.Categoria.Id != 0)
                 {
                     usuario.CategoriaId = usuarioDTO.Categoria.Id;
                 }
@@ -230,7 +235,7 @@ namespace LexERP.Server.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(UsuarioDTO usuarioDTO)
         {
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == usuarioDTO.Id && x.Eliminado==false);
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == usuarioDTO.Id && x.Eliminado == false);
 
             if (usuario == null) { return NotFound(); }
 
@@ -252,7 +257,7 @@ namespace LexERP.Server.Controllers
             }
 
             // Si ha variado el estado de "activo", bloquear o desbloquear usuario
-            if (usuario.Activo!=usuarioDTO.Activo)
+            if (usuario.Activo != usuarioDTO.Activo)
             {
                 if (usuarioDTO.Activo)
                 {
