@@ -21,7 +21,7 @@ else
 
     private bool inicializado = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         item.rolName = "user";
         item.Departamento = new DepartamentoDTOmin();

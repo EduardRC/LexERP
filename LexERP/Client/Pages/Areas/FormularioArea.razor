@@ -1,5 +1,87 @@
-﻿<h3>FormularioAreas</h3>
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12 col-lg-8 col-xl-6">
+
+                @if (ModoEdicion)
+                {
+                    <div class="form-inline">
+                        <div>
+                            <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                            <ValidationMessage For="@(() => Item.Activo)" />
+                        </div>
+                        &nbsp; <label>Área activa</label>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label>Abreviatura:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Abreviatura" />
+                        <ValidationMessage For="@(() => Item.Abreviatura)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descripcion:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Descripcion" />
+                        <ValidationMessage For="@(() => Item.Descripcion)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Departamento:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Departamento.Id">
+                            @foreach (var departamento in departamentos)
+                            {
+                                <option value="@departamento.Id">@departamento.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+}
 
 @code {
+    [Parameter] public AreaDTO Item { get; set; }
+    [Parameter] public Boolean ModoEdicion { get; set; } = false;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
 
+    private bool inicializado = false;
+
+    private List<DepartamentoDTOmin> departamentos;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await CargarDepartamentos();
+
+        inicializado = true;
+    }
+
+    private async Task CargarDepartamentos()
+    {
+        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>("api/departamentos/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            departamentos = httpResponse.Response;
+        }
+    }
 }

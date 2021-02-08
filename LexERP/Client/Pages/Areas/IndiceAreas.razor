@@ -3,9 +3,9 @@
 @inject IMostrarMensajes mostrarMensajes
 @attribute [Authorize]
 
-
 <IndiceGenerico @ref="child"
                 Listado="listado"
+                SortOrder="@sortOrder"
                 RefListado="areas"
                 UrlNuevo="/areas/crear"
                 TituloListado="Listado de Áreas"
@@ -15,8 +15,9 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Abreviatura</th>
+                    <th>Abrv.</th>
                     <th>Descripción</th>
+                    <th>Orden</th>
                 </tr>
             </thead>
         </table>
@@ -30,7 +31,7 @@
                     <th class="text-corporativo">
                         <a @onclick="@(()=>NuevoOrdenamiento("abreviatura"))" style="cursor:pointer">
                             Abreviatura
-                            @if (sortOrder == "abreviatura")
+                            @if (sortOrder == "abreviatura_desc")
                             {
                                 <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
@@ -61,16 +62,33 @@
                             }
                         </a>
                     </th>
-
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("orden"))" style="cursor:pointer">
+                            Orden
+                            @if (sortOrder == "orden_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "orden")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in listado)
                 {
-                    <tr @onclick="@(()=>EditarRegistro(item.Id))" style="cursor:pointer;">
-                        <td>@item.Abreviatura</td>
-                        <td>@item.Descripcion</td>
-                    </tr>
+                <tr @onclick="@(()=>EditarRegistro(item.Id))" style="cursor:pointer;">
+                    <td>@item.Abreviatura</td>
+                    <td>@item.Descripcion</td>
+                    <td>@item.Orden</td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -104,11 +122,14 @@
     {
         switch (campo)
         {
+            case "abreviatura":
+                sortOrder = "abreviatura" + ((sortOrder == "abreviatura") ? "_desc" : "");
+                break;
             case "descripcion":
                 sortOrder = "descripcion" + ((sortOrder == "descripcion") ? "_desc" : "");
                 break;
-            case "importe":
-                sortOrder = "importe" + ((sortOrder == "importe") ? "_desc" : "");
+            case "orden":
+                sortOrder = "orden" + ((sortOrder == "orden") ? "_desc" : "");
                 break;
         }
 
@@ -117,6 +138,6 @@
 
     private async Task EditarRegistro(int id)
     {
-        await child.EditarRegistro($"categorias/editar/{id}");
+        await child.EditarRegistro($"areas/editar/{id}");
     }
 }

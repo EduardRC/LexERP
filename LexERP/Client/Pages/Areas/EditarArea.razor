@@ -1,5 +1,91 @@
-﻿<h3>EditarArea</h3>
+﻿@page "/areas/editar/{Id:int}"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+
+@if (item == null)
+{
+    <Cargando />
+}
+else
+{
+    <h3>Editar @item.Descripcion</h3>
+    <div>
+        <button @onclick="@(()=>EliminarRegistro(item.Id))" class="btn btn-primary">Borrar área</button>
+        <br />
+        <br />
+    </div>
+
+    <FormularioArea Item="item"
+                    ModoEdicion=true
+                    OnValidSubmit="Guardar" />
+}
+
 
 @code {
+    [CascadingParameter] public IModalService Modal { get; set; }
 
+    [Parameter] public int Id { get; set; }
+
+    private AreaDTO item;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<AreaDTO>($"api/areas/{Id}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            item = httpResponse.Response;
+        }
+    }
+
+    private async Task Guardar()
+    {
+        var httpResponse = await repositorio.Put("api/areas", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/areas");
+        }
+    }
+
+    private async Task EliminarRegistro(int id)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar el area {item.Descripcion.ToUpper()}?");
+
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var confirmationModal = Modal.Show<ConfirmarEliminacion>("", parameters, options);
+        var result = await confirmationModal.Result;
+
+        if (!result.Cancelled)
+        {
+            var httpResponse = await repositorio.Delete($"api/areas/{id}");
+
+            if (httpResponse.Error)
+            {
+                await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+            }
+            else
+            {
+                navigationManager.NavigateTo("/areas");
+            }
+        }
+    }
 }

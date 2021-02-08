@@ -1,5 +1,45 @@
-﻿<h3>CrearArea</h3>
+﻿@page "/areas/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Área</h3>
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <FormularioArea Item="item"
+                    OnValidSubmit="Crear" />
+}
 
 @code {
+    private AreaDTO item = new AreaDTO();
 
+    private bool inicializado = false;
+
+
+    protected override void OnInitialized()
+    {
+        item.Departamento = new DepartamentoDTOmin();
+        
+        inicializado = true;
+    }
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/areas", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/areas");
+        }
+    }
 }
