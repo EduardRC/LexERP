@@ -4,14 +4,16 @@ using LexERP.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LexERP.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210208122438_Empresas")]
+    partial class Empresas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1209,66 +1211,6 @@ namespace LexERP.Server.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Idiomas");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.Menu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<string>("IconName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("MenuName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PageName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("Menus");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.MenuRol", b =>
-                {
-                    b.Property<int>("MenuId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RolName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("MenuId", "RolName");
-
-                    b.ToTable("MenuRoles");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.MenuUsuario", b =>
-                {
-                    b.Property<int>("MenuId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MenuId", "UsuarioId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("MenuUsuarios");
                 });
 
             modelBuilder.Entity("LexERP.Shared.Entities.Pais", b =>
@@ -2476,45 +2418,6 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("FacturaRectificada");
 
                     b.Navigation("Pais");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.Menu", b =>
-                {
-                    b.HasOne("LexERP.Shared.Entities.Menu", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
-
-                    b.Navigation("Parent");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.MenuRol", b =>
-                {
-                    b.HasOne("LexERP.Shared.Entities.Menu", "Menu")
-                        .WithMany()
-                        .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Menu");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.MenuUsuario", b =>
-                {
-                    b.HasOne("LexERP.Shared.Entities.Menu", "Menu")
-                        .WithMany()
-                        .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Menu");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("LexERP.Shared.Entities.Pais", b =>

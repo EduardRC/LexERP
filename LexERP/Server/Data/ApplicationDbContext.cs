@@ -19,14 +19,13 @@ namespace LexERP.Server.Data
         {
         }
 
-        //protected override void OnModelCreating(ModelBuilder builder)
-        //{
-        //    builder.Entity<PersonaSector>().HasKey(c => new { c.PersonaId, c.SectorId });
-        //    //builder.Entity<ClienteServicio>().HasKey(c => new { c.ClienteId, c.ServicioId });
-        //    //builder.Entity<ClientePersona>().HasKey(c => new { c.ClienteId, c.PersonaId });
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<MenuRol>().HasKey(c => new { c.MenuId, c.RolName });
+            builder.Entity<MenuUsuario>().HasKey(c => new { c.MenuId, c.UsuarioId });
 
-        //    base.OnModelCreating(builder);
-        //}
+            base.OnModelCreating(builder);
+        }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<ApplicationRole> ApplicationRoles { get; set; }
@@ -62,5 +61,11 @@ namespace LexERP.Server.Data
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<Actuacion> Actuaciones { get; set; }
         public DbSet<TipoActuacion> TipoActuaciones { get; set; }
+
+        public DbSet<Empresa> Empresas { get; set; }
+
+        public DbSet<Menu> Menus { get; set; }
+        public DbSet<MenuRol> MenuRoles { get; set; }
+        public DbSet<MenuUsuario> MenuUsuarios { get; set; }
     }
 }

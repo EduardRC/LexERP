@@ -1,4 +1,8 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@using LexERP.Shared.Entities
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">LexERP</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -6,46 +10,94 @@
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <AuthorizeView>
-            <Authorized>
-                <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="oi oi-home" aria-hidden="true"></span> Inicio
-                    </NavLink>
-                </li>
-                <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="departamentos">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Departamentos
-                    </NavLink>
-                </li>
-                <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="categorias">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Categorias
-                    </NavLink>
-                </li>
-            </Authorized>
-        </AuthorizeView>
 
-        <AuthorizeView Roles="admin">
-            <Authorized>
+    @if (menu == null)
+    {
+        <Cargando Invert="true" />
+    }
+    else
+    {
+        <ul class="nav flex-column">
+            @foreach (var item in menu.Where(x => x.ParentId == null).OrderBy(x=>x.Position))
+            {
                 <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="usuarios">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Usuarios
+                    <NavLink class="nav-link" href="@item.PageName" @onclick="()=>GetIsClicked(item)">
+                        <span class="@item.IconName" aria-hidden="true"></span> @item.MenuName
                     </NavLink>
+                    <ul class="nav flex-column">
+                        @foreach (var subItem in menu.Where(x => x.ParentId == item.Id).OrderBy(x => x.Position))
+                        {
+                            @if (expandSubNav && item.Id == clickedMenu)
+                            {
+                                <li class="nav-item px-3">
+                                    <NavLink class="nav-link" href="@subItem.PageName">
+                                        <span class="@subItem.IconName" aria-hidden="true"></span> @subItem.MenuName
+                                    </NavLink>
+                                </li>
+                            }
+                        }
+                    </ul>
                 </li>
-            </Authorized>
-        </AuthorizeView>
-    </ul>
+            }
+        </ul>
+    }
+
 </div>
 
 @code {
     private bool collapseNavMenu = true;
 
+    private List<Menu> menu;
+    private int clickedMenu = 0;
+    private int prevClickedMenu = 0;
+    private bool expandSubNav;
+    private bool hasPageName = true;
+
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        collapseNavMenu = (!collapseNavMenu && !expandSubNav);
     }
+
+    private void GetIsClicked(Menu menu)
+    {
+        clickedMenu = menu.Id;
+
+        if (prevClickedMenu != clickedMenu)
+        {
+            expandSubNav = false;
+            if (menu.PageName != "" || menu.MenuName == "Inicio")
+            {
+                hasPageName = true;
+            }
+            else
+            {
+                expandSubNav = !expandSubNav;
+                hasPageName = false;
+            }
+        }
+        else
+        {
+            expandSubNav = !expandSubNav;
+        }
+
+        prevClickedMenu = clickedMenu;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<List<Menu>>("api/menu");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            menu = httpResponse.Response;
+        }
+    }
+
+
 }

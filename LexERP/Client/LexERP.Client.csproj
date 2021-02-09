@@ -20,7 +20,6 @@
   <ItemGroup>
     <Folder Include="Pages\Clientes\" />
     <Folder Include="Pages\Contactos\" />
-    <Folder Include="Pages\Empresas\" />
     <Folder Include="Pages\Expedientes\" />
     <Folder Include="Pages\Facturas\" />
     <Folder Include="Pages\FormasDePago\" />

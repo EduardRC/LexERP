@@ -18,6 +18,8 @@ namespace LexERP.Shared.DTOs
         public string Descripcion { get; set; }
 
         public int Orden { get; set; }
+        public bool Activo { get; set; }
+
         public DepartamentoDTOmin Departamento { get; set; }
         public AreaDTOmin Parent { get; set; }
 
@@ -33,5 +35,8 @@ namespace LexERP.Shared.DTOs
 
         [StringLength(50)]
         public string Descripcion { get; set; }
+
+        public int Orden { get; set; }
+        public bool Activo { get; set; }
     }
 }

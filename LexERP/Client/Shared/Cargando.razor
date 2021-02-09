@@ -1,2 +1,12 @@
-﻿<img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" />
-<text>Cargando...</text>
+﻿@if (Invert)
+{
+    <img src="/img/loading-black.gif" alt="cargando ..."/>
+}
+else
+{
+    <img src="/img/loading-white.gif" alt="cargando ..."/>
+}
+
+@code{
+    [Parameter] public bool Invert { get; set; } = false;
+}

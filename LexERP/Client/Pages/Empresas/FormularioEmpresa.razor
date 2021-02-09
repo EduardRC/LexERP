@@ -1,0 +1,95 @@
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+@if (Item == null)
+{
+    <Cargando />
+}
+else
+{
+<EditForm Model="Item" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-sm-12 col-lg-8 col-xl-6">
+
+            @if (ModoEdicion)
+            {
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                        <ValidationMessage For="@(() => Item.Activo)" />
+                    </div>
+                    &nbsp; <label>Empresa activa</label>
+                </div>
+            }
+
+            <div class="form-group">
+                <label>Abreviatura:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Abreviatura" />
+                    <ValidationMessage For="@(() => Item.Abreviatura)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Razón Social:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.RazonSocial" />
+                    <ValidationMessage For="@(() => Item.RazonSocial)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>NIF:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.NIF" />
+                    <ValidationMessage For="@(() => Item.NIF)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Dirección:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Direccion" />
+                    <ValidationMessage For="@(() => Item.Direccion)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Población:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Poblacion" />
+                    <ValidationMessage For="@(() => Item.Poblacion)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Código Postal:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.CodigoPostal" />
+                    <ValidationMessage For="@(() => Item.CodigoPostal)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Provincia:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@Item.Provincia" />
+                    <ValidationMessage For="@(() => Item.Provincia)" />
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-12 col-lg-4 col-xl-6">
+            <div class="form-group">
+                <label>Observaciones:</label>
+                <div>
+                    <InputTextArea rows="10" class="form-control" @bind-Value="@Item.Observaciones" />
+                    <ValidationMessage For="@(() => Item.Observaciones)" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Guardar</button>
+</EditForm>
+}
+
+@code {
+    [Parameter] public EmpresaDTO Item { get; set; }
+    [Parameter] public Boolean ModoEdicion { get; set; } = false;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}
