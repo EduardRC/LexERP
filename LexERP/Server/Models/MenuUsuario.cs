@@ -12,6 +12,6 @@ namespace LexERP.Server.Models
         public int UsuarioId { get; set; }
 
         virtual public Menu Menu { get; set; }
-        virtual public Usuario Usuario { get; set; }
+        virtual public ApplicationUser Usuario { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LexERP.Server.Models
 {
-    public class ApplicationRole : IdentityRole
+    public class ApplicationRole : IdentityRole<int>
     {
         public ApplicationRole()
         {

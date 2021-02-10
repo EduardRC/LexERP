@@ -1,9 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar" style="overflow-y:auto">
+                <NavMenu />
+            </div>
+        </Authorized>
+    </AuthorizeView>
 
     <div class="main">
         <div class="top-row px-4 auth">
@@ -16,3 +20,4 @@
         </div>
     </div>
 </div>
+

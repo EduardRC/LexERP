@@ -13,7 +13,7 @@ namespace LexERP.Server.Models
         public Expediente()
         {
             Children = new HashSet<Expediente>();
-            Usuarios = new HashSet<Usuario>();
+            Usuarios = new HashSet<ExpedienteUsuario>();
         }
 
         public int Id { get; set; }
@@ -62,7 +62,7 @@ namespace LexERP.Server.Models
         public int? ParentId { get; set; }
 
         public bool Confidencial { get; set; } // si esta activo, solo pueden ver el exp los usuarios asignados
-        public virtual ICollection<Usuario> Usuarios { get; set; }  // usuarios asignados
+        public virtual ICollection<ExpedienteUsuario> Usuarios { get; set; }  // usuarios asignados
 
         public virtual Expediente Parent { get; set; }
         public virtual ICollection<Expediente> Children { get; set; }
@@ -71,10 +71,10 @@ namespace LexERP.Server.Models
         public virtual Cliente Cliente { get; set; }
         public virtual Contrato Contrato { get; set; }
         public virtual TipoExpediente TipoExpediente { get; set; }
-        public virtual Usuario Responsable { get; set; }
-        public virtual Usuario SocioResponsable { get; set; }
-        public virtual Usuario ResponsableComercial { get; set; }
-        public virtual Usuario ResponsableFacturacion { get; set; }
+        public virtual ApplicationUser Responsable { get; set; }
+        public virtual ApplicationUser SocioResponsable { get; set; }
+        public virtual ApplicationUser ResponsableComercial { get; set; }
+        public virtual ApplicationUser ResponsableFacturacion { get; set; }
         public virtual Area Area { get; set; }
         public virtual Tarifa Tarifa { get; set; }
 

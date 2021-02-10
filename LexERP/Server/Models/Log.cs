@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LexERP.Server.Models
 {
-    public class UsuarioLog
+    public class Log
     {
         public int Id { get; set; }
         public int UsuarioId { get; set; }
@@ -17,7 +17,7 @@ namespace LexERP.Server.Models
         [StringLength(80)]
         public string Info { get; set; }
 
-        public virtual Usuario Usuario { get; set; }
+        public virtual ApplicationUser Usuario { get; set; }
     }
 
     public enum TipoLog

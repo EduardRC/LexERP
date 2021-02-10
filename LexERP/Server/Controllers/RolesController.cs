@@ -69,7 +69,8 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet("edit/{id}")]
-        public async Task<ActionResult<RolDTO>> Get(string id)
+//        public async Task<ActionResult<RolDTO>> Get(string id)
+        public async Task<ActionResult<RolDTO>> Get(int id)
         {
             var rol = await _context.Roles.Where(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -123,7 +124,7 @@ namespace LexERP.Server.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(RolDTO rolDTO)
         {
-            var rol = await _roleManager.FindByIdAsync(rolDTO.RoleId);
+            var rol = await _roleManager.FindByIdAsync(rolDTO.RoleId.ToString());
 
             rol.Name = rolDTO.Nombre;
             await _roleManager.UpdateAsync(rol);

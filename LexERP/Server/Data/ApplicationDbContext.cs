@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LexERP.Server.Data
 {
-    public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
+    public class ApplicationDbContext : KeyApiAuthorizationDbContext<ApplicationUser,ApplicationRole, int>
     {
         public ApplicationDbContext(
             DbContextOptions options,
@@ -22,6 +22,7 @@ namespace LexERP.Server.Data
         {
             builder.Entity<MenuRol>().HasKey(c => new { c.MenuId, c.RolName });
             builder.Entity<MenuUsuario>().HasKey(c => new { c.MenuId, c.UsuarioId });
+            builder.Entity<ExpedienteUsuario>().HasKey(c => new { c.ExpedienteId, c.UsuarioId });
 
             base.OnModelCreating(builder);
         }
@@ -37,8 +38,7 @@ namespace LexERP.Server.Data
         public DbSet<TipoContrato> TipoContratos { get; set; }
         public DbSet<FormaDePago> FormasDePago { get; set; }
 
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<UsuarioLog> UsuarioLogs { get; set; }
+        public DbSet<Log> Logs { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Departamento> Departamentos { get; set; }
 

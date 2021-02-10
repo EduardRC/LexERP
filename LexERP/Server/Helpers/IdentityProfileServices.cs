@@ -29,7 +29,9 @@ namespace LexERP.Server.Helpers
         public async Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             var usuarioId = context.Subject.GetSubjectId();
-            var usuario = await _userManager.FindByIdAsync(usuarioId);
+            var usr = context.Subject.GetDisplayName();
+//            var usuario = await _userManager.FindByIdAsync(usuarioId);
+            var usuario = await _userManager.FindByNameAsync(usr);
             var claimsPrincipal = await _claimsFactory.CreateAsync(usuario);
             var claims = claimsPrincipal.Claims.ToList();
 
@@ -47,7 +49,7 @@ namespace LexERP.Server.Helpers
 
             // guardar id del usuario para poder utilizarlo al guardar logs de actividad, 
             // sin tener que consultarlo cada vez a la BD
-            claims.Add(new Claim(JwtClaimTypes.Id, usuario.UsuarioId.ToString()));
+            claims.Add(new Claim(JwtClaimTypes.Id, usuario.Id.ToString()));
 
             context.IssuedClaims = claims;
         }

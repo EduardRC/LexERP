@@ -13,7 +13,7 @@ namespace LexERP.Server.Models
 
         public Departamento()
         {
-            Usuarios = new HashSet<Usuario>();
+            Usuarios = new HashSet<ApplicationUser>();
         }
 
         public int Id { get; set; }
@@ -26,6 +26,6 @@ namespace LexERP.Server.Models
 
         public int Orden { get; set; }
 
-        public virtual ICollection<Usuario> Usuarios { get; set; }
+        public virtual ICollection<ApplicationUser> Usuarios { get; set; }
     }
 }

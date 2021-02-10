@@ -93,7 +93,8 @@
         await child.NuevoOrdenamiento(sortOrder);
     }
 
-    private async Task EditarRegistro(string id)
+//    private async Task EditarRegistro(string id)
+    private async Task EditarRegistro(int id)
     {
         await child.EditarRegistro($"roles/editar/{id}");
     }

@@ -8,13 +8,15 @@ namespace LexERP.Shared.DTOs
 {
     public class RolDTO
     {
-        public string RoleId { get; set; }
+//        public string RoleId { get; set; }
+        public int RoleId { get; set; }
         public string Nombre { get; set; }
     }
 
     public class RolDTOuser
     {
-        public string UserId { get; set; }
+//        public string UserId { get; set; }
+        public int UserId { get; set; }
         public string RoleNombre { get; set; }
     }
 }

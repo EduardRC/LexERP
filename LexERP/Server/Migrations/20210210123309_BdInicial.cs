@@ -1,18 +1,26 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace LexERP.Server.Data.Migrations
+namespace LexERP.Server.Migrations
 {
-    public partial class bdinicial : Migration
+    public partial class BdInicial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Discriminator",
-                table: "AspNetRoles",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Categorias",
@@ -58,7 +66,26 @@ namespace LexERP.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Empresa",
+                name: "DeviceCodes",
+                columns: table => new
+                {
+                    UserCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DeviceCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    SubjectId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Expiration = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Data = table.Column<string>(type: "nvarchar(max)", maxLength: 50000, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeviceCodes", x => x.UserCode);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Empresas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -81,7 +108,7 @@ namespace LexERP.Server.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Empresa", x => x.Id);
+                    table.PrimaryKey("PK_Empresas", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -124,6 +151,49 @@ namespace LexERP.Server.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Idiomas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Menus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ParentId = table.Column<int>(type: "int", nullable: true),
+                    PageName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    MenuName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IconName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Position = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Menus", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Menus_Menus_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Menus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PersistedGrants",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    SubjectId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Expiration = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ConsumedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Data = table.Column<string>(type: "nvarchar(max)", maxLength: 50000, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PersistedGrants", x => x.Key);
                 });
 
             migrationBuilder.CreateTable(
@@ -252,6 +322,27 @@ namespace LexERP.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Areas",
                 columns: table => new
                 {
@@ -288,6 +379,61 @@ namespace LexERP.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Iniciales = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: true),
+                    Nombre = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    Apellidos = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    DepartamentoId = table.Column<int>(type: "int", nullable: true),
+                    CategoriaId = table.Column<int>(type: "int", nullable: true),
+                    EsSocio = table.Column<bool>(type: "bit", nullable: false),
+                    EsResponsableComercial = table.Column<bool>(type: "bit", nullable: false),
+                    EsResponsableExpediente = table.Column<bool>(type: "bit", nullable: false),
+                    EsResponsableFacturacion = table.Column<bool>(type: "bit", nullable: false),
+                    EsCaptadorComisionista = table.Column<bool>(type: "bit", nullable: false),
+                    CreadoPor = table.Column<int>(type: "int", nullable: false),
+                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
+                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Categorias_CategoriaId",
+                        column: x => x.CategoriaId,
+                        principalTable: "Categorias",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Departamentos_DepartamentoId",
+                        column: x => x.DepartamentoId,
+                        principalTable: "Departamentos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tarifas",
                 columns: table => new
                 {
@@ -311,9 +457,9 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Tarifas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tarifas_Empresa_EmpresaId",
+                        name: "FK_Tarifas_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
-                        principalTable: "Empresa",
+                        principalTable: "Empresas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -341,6 +487,197 @@ namespace LexERP.Server.Data.Migrations
                         name: "FK_Paises_Idiomas_IdiomaId",
                         column: x => x.IdiomaId,
                         principalTable: "Idiomas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MenuRoles",
+                columns: table => new
+                {
+                    MenuId = table.Column<int>(type: "int", nullable: false),
+                    RolName = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuRoles", x => new { x.MenuId, x.RolName });
+                    table.ForeignKey(
+                        name: "FK_MenuRoles_Menus_MenuId",
+                        column: x => x.MenuId,
+                        principalTable: "Menus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Logs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Tipo = table.Column<int>(type: "int", nullable: false),
+                    Info = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Logs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Logs_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MenuUsuarios",
+                columns: table => new
+                {
+                    MenuId = table.Column<int>(type: "int", nullable: false),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuUsuarios", x => new { x.MenuId, x.UsuarioId });
+                    table.ForeignKey(
+                        name: "FK_MenuUsuarios_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MenuUsuarios_Menus_MenuId",
+                        column: x => x.MenuId,
+                        principalTable: "Menus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TarifaDetalles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TarifaId = table.Column<int>(type: "int", nullable: false),
+                    CategoriaId = table.Column<int>(type: "int", nullable: true),
+                    UsuarioId = table.Column<int>(type: "int", nullable: true),
+                    ImporteHora = table.Column<decimal>(type: "money", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreadoPor = table.Column<int>(type: "int", nullable: false),
+                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
+                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TarifaDetalles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TarifaDetalles_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TarifaDetalles_Categorias_CategoriaId",
+                        column: x => x.CategoriaId,
+                        principalTable: "Categorias",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TarifaDetalles_Tarifas_TarifaId",
+                        column: x => x.TarifaId,
+                        principalTable: "Tarifas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -393,9 +730,33 @@ namespace LexERP.Server.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Expedientes_Empresa_EmpresaId",
+                        name: "FK_Expedientes_AspNetUsers_ResponsableComercialId",
+                        column: x => x.ResponsableComercialId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Expedientes_AspNetUsers_ResponsableFacturacionId",
+                        column: x => x.ResponsableFacturacionId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Expedientes_AspNetUsers_ResponsableId",
+                        column: x => x.ResponsableId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Expedientes_AspNetUsers_SocioResponsableId",
+                        column: x => x.SocioResponsableId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Expedientes_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
-                        principalTable: "Empresa",
+                        principalTable: "Empresas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -419,178 +780,25 @@ namespace LexERP.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Usuarios",
+                name: "ExpedienteUsuario",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Iniciales = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: true),
-                    Nombre = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
-                    Apellidos = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    DepartamentoId = table.Column<int>(type: "int", nullable: false),
-                    CategoriaId = table.Column<int>(type: "int", nullable: false),
-                    EsSocio = table.Column<bool>(type: "bit", nullable: false),
-                    EsResponsableComercial = table.Column<bool>(type: "bit", nullable: false),
-                    EsResponsableExpediente = table.Column<bool>(type: "bit", nullable: false),
-                    EsResponsableFacturacion = table.Column<bool>(type: "bit", nullable: false),
-                    EsCaptadorComisionista = table.Column<bool>(type: "bit", nullable: false),
-                    ExpedienteId = table.Column<int>(type: "int", nullable: true),
-                    CreadoPor = table.Column<int>(type: "int", nullable: false),
-                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
-                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                    ExpedienteId = table.Column<int>(type: "int", nullable: false),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                    table.PrimaryKey("PK_ExpedienteUsuario", x => new { x.ExpedienteId, x.UsuarioId });
                     table.ForeignKey(
-                        name: "FK_Usuarios_Categorias_CategoriaId",
-                        column: x => x.CategoriaId,
-                        principalTable: "Categorias",
+                        name: "FK_ExpedienteUsuario_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Usuarios_Departamentos_DepartamentoId",
-                        column: x => x.DepartamentoId,
-                        principalTable: "Departamentos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Usuarios_Expedientes_ExpedienteId",
+                        name: "FK_ExpedienteUsuario_Expedientes_ExpedienteId",
                         column: x => x.ExpedienteId,
                         principalTable: "Expedientes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TarifaDetalles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TarifaId = table.Column<int>(type: "int", nullable: false),
-                    CategoriaId = table.Column<int>(type: "int", nullable: true),
-                    UsuarioId = table.Column<int>(type: "int", nullable: true),
-                    ImporteHora = table.Column<decimal>(type: "money", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreadoPor = table.Column<int>(type: "int", nullable: false),
-                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
-                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TarifaDetalles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TarifaDetalles_Categorias_CategoriaId",
-                        column: x => x.CategoriaId,
-                        principalTable: "Categorias",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TarifaDetalles_Tarifas_TarifaId",
-                        column: x => x.TarifaId,
-                        principalTable: "Tarifas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TarifaDetalles_Usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UsuarioLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Tipo = table.Column<int>(type: "int", nullable: false),
-                    Info = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UsuarioLogs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UsuarioLogs_Usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ClienteServicio",
-                columns: table => new
-                {
-                    ClientesId = table.Column<int>(type: "int", nullable: false),
-                    ServiciosId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ClienteServicio", x => new { x.ClientesId, x.ServiciosId });
-                    table.ForeignKey(
-                        name: "FK_ClienteServicio_Servicios_ServiciosId",
-                        column: x => x.ServiciosId,
-                        principalTable: "Servicios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ConceptosEconomicos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EmpresaId = table.Column<int>(type: "int", nullable: false),
-                    ClienteId = table.Column<int>(type: "int", nullable: true),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TipoConceptoEconomico = table.Column<int>(type: "int", nullable: false),
-                    Importe = table.Column<decimal>(type: "money", nullable: false),
-                    Texto = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProveedorId = table.Column<int>(type: "int", nullable: true),
-                    Facturable = table.Column<bool>(type: "bit", nullable: false),
-                    ImpuestoTPC = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
-                    ImpuestoImporte = table.Column<decimal>(type: "money", nullable: false),
-                    IRPFTPC = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
-                    IRPFImporte = table.Column<decimal>(type: "money", nullable: false),
-                    FacturaId = table.Column<int>(type: "int", nullable: true),
-                    ParentId = table.Column<int>(type: "int", nullable: true),
-                    CreadoPor = table.Column<int>(type: "int", nullable: false),
-                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
-                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ConceptosEconomicos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ConceptosEconomicos_ConceptosEconomicos_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "ConceptosEconomicos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ConceptosEconomicos_Empresa_EmpresaId",
-                        column: x => x.EmpresaId,
-                        principalTable: "Empresa",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -622,9 +830,9 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Actuaciones", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Actuaciones_ConceptosEconomicos_ConceptoEconomicoId",
-                        column: x => x.ConceptoEconomicoId,
-                        principalTable: "ConceptosEconomicos",
+                        name: "FK_Actuaciones_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -639,12 +847,101 @@ namespace LexERP.Server.Data.Migrations
                         principalTable: "TipoActuaciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Clientes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdPublico = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false),
+                    PersonaId = table.Column<int>(type: "int", nullable: false),
+                    Abreviatura = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    Codigo = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
+                    CodigoAlternativo = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
+                    NombreComercial = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    ResponsableComercialId = table.Column<int>(type: "int", nullable: true),
+                    ResponsableFacturacionId = table.Column<int>(type: "int", nullable: true),
+                    CaptadorId = table.Column<int>(type: "int", nullable: true),
+                    TarifaId = table.Column<int>(type: "int", nullable: true),
+                    AplicarIVA = table.Column<bool>(type: "bit", nullable: false),
+                    AplicarRetencion = table.Column<bool>(type: "bit", nullable: false),
+                    Empleados = table.Column<int>(type: "int", nullable: false),
+                    ValorFacturacion = table.Column<decimal>(type: "money", nullable: false),
+                    ParentId = table.Column<int>(type: "int", nullable: true),
+                    CreadoPor = table.Column<int>(type: "int", nullable: false),
+                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
+                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clientes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Actuaciones_Usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
+                        name: "FK_Clientes_AspNetUsers_CaptadorId",
+                        column: x => x.CaptadorId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Clientes_AspNetUsers_ResponsableComercialId",
+                        column: x => x.ResponsableComercialId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Clientes_AspNetUsers_ResponsableFacturacionId",
+                        column: x => x.ResponsableFacturacionId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Clientes_Clientes_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Clientes_Empresas_EmpresaId",
+                        column: x => x.EmpresaId,
+                        principalTable: "Empresas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Clientes_Tarifas_TarifaId",
+                        column: x => x.TarifaId,
+                        principalTable: "Tarifas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClienteServicio",
+                columns: table => new
+                {
+                    ClientesId = table.Column<int>(type: "int", nullable: false),
+                    ServiciosId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClienteServicio", x => new { x.ClientesId, x.ServiciosId });
+                    table.ForeignKey(
+                        name: "FK_ClienteServicio_Clientes_ClientesId",
+                        column: x => x.ClientesId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClienteServicio_Servicios_ServiciosId",
+                        column: x => x.ServiciosId,
+                        principalTable: "Servicios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -679,6 +976,18 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Contratos", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Contratos_AspNetUsers_UsuarioControlId",
+                        column: x => x.UsuarioControlId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Contratos_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Contratos_FormasDePago_FormaDePagoId",
                         column: x => x.FormaDePagoId,
                         principalTable: "FormasDePago",
@@ -696,12 +1005,6 @@ namespace LexERP.Server.Data.Migrations
                         principalTable: "TipoContratos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Contratos_Usuarios_UsuarioControlId",
-                        column: x => x.UsuarioControlId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -747,9 +1050,15 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Facturas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Facturas_Empresa_EmpresaId",
+                        name: "FK_Facturas_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Facturas_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
-                        principalTable: "Empresa",
+                        principalTable: "Empresas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -764,6 +1073,64 @@ namespace LexERP.Server.Data.Migrations
                         principalTable: "Paises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConceptosEconomicos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: true),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TipoConceptoEconomico = table.Column<int>(type: "int", nullable: false),
+                    Importe = table.Column<decimal>(type: "money", nullable: false),
+                    Texto = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProveedorId = table.Column<int>(type: "int", nullable: true),
+                    Facturable = table.Column<bool>(type: "bit", nullable: false),
+                    ImpuestoTPC = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    ImpuestoImporte = table.Column<decimal>(type: "money", nullable: false),
+                    IRPFTPC = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    IRPFImporte = table.Column<decimal>(type: "money", nullable: false),
+                    FacturaId = table.Column<int>(type: "int", nullable: true),
+                    ParentId = table.Column<int>(type: "int", nullable: true),
+                    CreadoPor = table.Column<int>(type: "int", nullable: false),
+                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
+                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConceptosEconomicos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ConceptosEconomicos_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ConceptosEconomicos_ConceptosEconomicos_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "ConceptosEconomicos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ConceptosEconomicos_Empresas_EmpresaId",
+                        column: x => x.EmpresaId,
+                        principalTable: "Empresas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ConceptosEconomicos_Facturas_FacturaId",
+                        column: x => x.FacturaId,
+                        principalTable: "Facturas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -795,88 +1162,17 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Personas", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Personas_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Personas_Idiomas_IdiomaId",
                         column: x => x.IdiomaId,
                         principalTable: "Idiomas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Clientes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdPublico = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmpresaId = table.Column<int>(type: "int", nullable: false),
-                    PersonaId = table.Column<int>(type: "int", nullable: false),
-                    Abreviatura = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    Codigo = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
-                    CodigoAlternativo = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
-                    NombreComercial = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
-                    ResponsableComercialId = table.Column<int>(type: "int", nullable: true),
-                    ResponsableFacturacionId = table.Column<int>(type: "int", nullable: true),
-                    CaptadorId = table.Column<int>(type: "int", nullable: true),
-                    TarifaId = table.Column<int>(type: "int", nullable: true),
-                    AplicarIVA = table.Column<bool>(type: "bit", nullable: false),
-                    AplicarRetencion = table.Column<bool>(type: "bit", nullable: false),
-                    Empleados = table.Column<int>(type: "int", nullable: false),
-                    ValorFacturacion = table.Column<decimal>(type: "money", nullable: false),
-                    ParentId = table.Column<int>(type: "int", nullable: true),
-                    CreadoPor = table.Column<int>(type: "int", nullable: false),
-                    CreadoFecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModificadoPor = table.Column<int>(type: "int", nullable: true),
-                    ModificadoFecha = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Eliminado = table.Column<bool>(type: "bit", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Clientes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Clientes_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "Clientes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Empresa_EmpresaId",
-                        column: x => x.EmpresaId,
-                        principalTable: "Empresa",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Personas_PersonaId",
-                        column: x => x.PersonaId,
-                        principalTable: "Personas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Tarifas_TarifaId",
-                        column: x => x.TarifaId,
-                        principalTable: "Tarifas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Usuarios_CaptadorId",
-                        column: x => x.CaptadorId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Usuarios_ResponsableComercialId",
-                        column: x => x.ResponsableComercialId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Clientes_Usuarios_ResponsableFacturacionId",
-                        column: x => x.ResponsableFacturacionId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -902,9 +1198,9 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Contactos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Contactos_Empresa_EmpresaId",
+                        name: "FK_Contactos_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
-                        principalTable: "Empresa",
+                        principalTable: "Empresas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -996,9 +1292,9 @@ namespace LexERP.Server.Data.Migrations
                 {
                     table.PrimaryKey("PK_Proveedores", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Proveedores_Empresa_EmpresaId",
+                        name: "FK_Proveedores_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
-                        principalTable: "Empresa",
+                        principalTable: "Empresas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -1077,6 +1373,55 @@ namespace LexERP.Server.Data.Migrations
                 name: "IX_Areas_ParentId",
                 table: "Areas",
                 column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CategoriaId",
+                table: "AspNetUsers",
+                column: "CategoriaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_DepartamentoId",
+                table: "AspNetUsers",
+                column: "DepartamentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clientes_CaptadorId",
@@ -1189,6 +1534,17 @@ namespace LexERP.Server.Data.Migrations
                 column: "TipoContactoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DeviceCodes_DeviceCode",
+                table: "DeviceCodes",
+                column: "DeviceCode",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceCodes_Expiration",
+                table: "DeviceCodes",
+                column: "Expiration");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Expedientes_AreaId",
                 table: "Expedientes",
                 column: "AreaId");
@@ -1244,6 +1600,11 @@ namespace LexERP.Server.Data.Migrations
                 column: "TipoExpedienteId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExpedienteUsuario_UsuarioId",
+                table: "ExpedienteUsuario",
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Facturas_ClienteId",
                 table: "Facturas",
                 column: "ClienteId");
@@ -1264,9 +1625,39 @@ namespace LexERP.Server.Data.Migrations
                 column: "PaisId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Logs_UsuarioId",
+                table: "Logs",
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Menus_ParentId",
+                table: "Menus",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MenuUsuarios_UsuarioId",
+                table: "MenuUsuarios",
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Paises_IdiomaId",
                 table: "Paises",
                 column: "IdiomaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersistedGrants_Expiration",
+                table: "PersistedGrants",
+                column: "Expiration");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersistedGrants_SubjectId_ClientId_Type",
+                table: "PersistedGrants",
+                columns: new[] { "SubjectId", "ClientId", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersistedGrants_SubjectId_SessionId_Type",
+                table: "PersistedGrants",
+                columns: new[] { "SubjectId", "SessionId", "Type" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Personas_ClienteId",
@@ -1328,26 +1719,6 @@ namespace LexERP.Server.Data.Migrations
                 table: "Ubicaciones",
                 column: "PersonaId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UsuarioLogs_UsuarioId",
-                table: "UsuarioLogs",
-                column: "UsuarioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_CategoriaId",
-                table: "Usuarios",
-                column: "CategoriaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_DepartamentoId",
-                table: "Usuarios",
-                column: "DepartamentoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_ExpedienteId",
-                table: "Usuarios",
-                column: "ExpedienteId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Expedientes_Clientes_ClienteId",
                 table: "Expedientes",
@@ -1365,90 +1736,26 @@ namespace LexERP.Server.Data.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Expedientes_Usuarios_ResponsableComercialId",
-                table: "Expedientes",
-                column: "ResponsableComercialId",
-                principalTable: "Usuarios",
+                name: "FK_Actuaciones_ConceptosEconomicos_ConceptoEconomicoId",
+                table: "Actuaciones",
+                column: "ConceptoEconomicoId",
+                principalTable: "ConceptosEconomicos",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Expedientes_Usuarios_ResponsableFacturacionId",
-                table: "Expedientes",
-                column: "ResponsableFacturacionId",
-                principalTable: "Usuarios",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Expedientes_Usuarios_ResponsableId",
-                table: "Expedientes",
-                column: "ResponsableId",
-                principalTable: "Usuarios",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Expedientes_Usuarios_SocioResponsableId",
-                table: "Expedientes",
-                column: "SocioResponsableId",
-                principalTable: "Usuarios",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ClienteServicio_Clientes_ClientesId",
-                table: "ClienteServicio",
-                column: "ClientesId",
-                principalTable: "Clientes",
+                name: "FK_Clientes_Personas_PersonaId",
+                table: "Clientes",
+                column: "PersonaId",
+                principalTable: "Personas",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ConceptosEconomicos_Clientes_ClienteId",
-                table: "ConceptosEconomicos",
-                column: "ClienteId",
-                principalTable: "Clientes",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ConceptosEconomicos_Facturas_FacturaId",
-                table: "ConceptosEconomicos",
-                column: "FacturaId",
-                principalTable: "Facturas",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ConceptosEconomicos_Proveedores_ProveedorId",
                 table: "ConceptosEconomicos",
                 column: "ProveedorId",
                 principalTable: "Proveedores",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Contratos_Clientes_ClienteId",
-                table: "Contratos",
-                column: "ClienteId",
-                principalTable: "Clientes",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Facturas_Clientes_ClienteId",
-                table: "Facturas",
-                column: "ClienteId",
-                principalTable: "Clientes",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Personas_Clientes_ClienteId",
-                table: "Personas",
-                column: "ClienteId",
-                principalTable: "Clientes",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
@@ -1464,27 +1771,23 @@ namespace LexERP.Server.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Usuarios_Expedientes_ExpedienteId",
-                table: "Usuarios");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Clientes_Usuarios_CaptadorId",
+                name: "FK_Clientes_AspNetUsers_CaptadorId",
                 table: "Clientes");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Clientes_Usuarios_ResponsableComercialId",
+                name: "FK_Clientes_AspNetUsers_ResponsableComercialId",
                 table: "Clientes");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Clientes_Usuarios_ResponsableFacturacionId",
+                name: "FK_Clientes_AspNetUsers_ResponsableFacturacionId",
                 table: "Clientes");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Clientes_Empresa_EmpresaId",
+                name: "FK_Clientes_Empresas_EmpresaId",
                 table: "Clientes");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Tarifas_Empresa_EmpresaId",
+                name: "FK_Tarifas_Empresas_EmpresaId",
                 table: "Tarifas");
 
             migrationBuilder.DropForeignKey(
@@ -1499,6 +1802,21 @@ namespace LexERP.Server.Data.Migrations
                 name: "Actuaciones");
 
             migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
                 name: "ClienteServicio");
 
             migrationBuilder.DropTable(
@@ -1508,13 +1826,28 @@ namespace LexERP.Server.Data.Migrations
                 name: "DatosContacto");
 
             migrationBuilder.DropTable(
+                name: "DeviceCodes");
+
+            migrationBuilder.DropTable(
+                name: "ExpedienteUsuario");
+
+            migrationBuilder.DropTable(
+                name: "Logs");
+
+            migrationBuilder.DropTable(
+                name: "MenuRoles");
+
+            migrationBuilder.DropTable(
+                name: "MenuUsuarios");
+
+            migrationBuilder.DropTable(
+                name: "PersistedGrants");
+
+            migrationBuilder.DropTable(
                 name: "PersonaSector");
 
             migrationBuilder.DropTable(
                 name: "TarifaDetalles");
-
-            migrationBuilder.DropTable(
-                name: "UsuarioLogs");
 
             migrationBuilder.DropTable(
                 name: "ConceptosEconomicos");
@@ -1523,10 +1856,19 @@ namespace LexERP.Server.Data.Migrations
                 name: "TipoActuaciones");
 
             migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
                 name: "Servicios");
 
             migrationBuilder.DropTable(
                 name: "TipoContactos");
+
+            migrationBuilder.DropTable(
+                name: "Expedientes");
+
+            migrationBuilder.DropTable(
+                name: "Menus");
 
             migrationBuilder.DropTable(
                 name: "Sectores");
@@ -1536,9 +1878,6 @@ namespace LexERP.Server.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Proveedores");
-
-            migrationBuilder.DropTable(
-                name: "Expedientes");
 
             migrationBuilder.DropTable(
                 name: "Areas");
@@ -1556,7 +1895,7 @@ namespace LexERP.Server.Data.Migrations
                 name: "TipoContratos");
 
             migrationBuilder.DropTable(
-                name: "Usuarios");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Categorias");
@@ -1565,7 +1904,7 @@ namespace LexERP.Server.Data.Migrations
                 name: "Departamentos");
 
             migrationBuilder.DropTable(
-                name: "Empresa");
+                name: "Empresas");
 
             migrationBuilder.DropTable(
                 name: "Personas");
@@ -1584,10 +1923,6 @@ namespace LexERP.Server.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Idiomas");
-
-            migrationBuilder.DropColumn(
-                name: "Discriminator",
-                table: "AspNetRoles");
         }
     }
 }

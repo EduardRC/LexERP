@@ -42,7 +42,7 @@ namespace LexERP.Server.Models
 
         public virtual Cliente Cliente { get; set; }
         public virtual TipoContrato TipoContrato { get; set; }
-        public virtual Usuario UsuarioControl { get; set; }
+        public virtual ApplicationUser UsuarioControl { get; set; }
         public virtual Tarifa Tarifa { get; set; }
         public virtual FormaDePago FormaDePago { get; set; }
 

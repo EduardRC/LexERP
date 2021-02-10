@@ -53,9 +53,9 @@ namespace LexERP.Server.Models
 
         public virtual Empresa Empresa { get; set; }
         public virtual Persona Persona { get; set; }
-        public virtual Usuario ResponsableComercial { get; set; }
-        public virtual Usuario ResponsableFacturacion { get; set; }
-        public virtual Usuario Captador { get; set; }
+        public virtual ApplicationUser ResponsableComercial { get; set; }
+        public virtual ApplicationUser ResponsableFacturacion { get; set; }
+        public virtual ApplicationUser Captador { get; set; }
         public virtual Tarifa Tarifa { get; set; }
         public virtual Cliente Parent { get; set; }
 

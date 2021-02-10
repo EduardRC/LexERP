@@ -4,16 +4,14 @@ using LexERP.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace LexERP.Server.Data.Migrations
+namespace LexERP.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210208122438_Empresas")]
-    partial class Empresas
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,75 +137,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("PersistedGrants");
                 });
 
-            modelBuilder.Entity("LexERP.Server.Models.ApplicationUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.Actuacion", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Actuacion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -277,7 +207,163 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Actuaciones");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Area", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ApplicationRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.ApplicationUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Apellidos")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreadoFecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreadoPor")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartamentoId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Eliminado")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsCaptadorComisionista")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsResponsableComercial")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsResponsableExpediente")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsResponsableFacturacion")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsSocio")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Iniciales")
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTime?>("ModificadoFecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModificadoPor")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("DepartamentoId");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Area", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -333,7 +419,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Areas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Categoria", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Categoria", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -375,7 +461,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Categorias");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Cliente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Cliente", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -476,7 +562,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.ConceptoEconomico", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ConceptoEconomico", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -566,7 +652,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("ConceptosEconomicos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Contacto", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Contacto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -620,7 +706,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Contactos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Contrato", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Contrato", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -708,7 +794,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Contratos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.DatoContacto", b =>
+            modelBuilder.Entity("LexERP.Server.Models.DatoContacto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -760,7 +846,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("DatosContacto");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Departamento", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Departamento", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -806,7 +892,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Departamentos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Empresa", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Empresa", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -872,7 +958,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Empresas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Expediente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Expediente", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1005,7 +1091,22 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Expedientes");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Factura", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ExpedienteUsuario", b =>
+                {
+                    b.Property<int>("ExpedienteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExpedienteId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("ExpedienteUsuario");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Factura", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1127,7 +1228,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Facturas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.FormaDePago", b =>
+            modelBuilder.Entity("LexERP.Server.Models.FormaDePago", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1170,7 +1271,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("FormasDePago");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Idioma", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Idioma", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1213,7 +1314,94 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Idiomas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Pais", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Log", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Info")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Logs");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Menu", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("IconName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MenuName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PageName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Menus");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.MenuRol", b =>
+                {
+                    b.Property<int>("MenuId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RolName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("MenuId", "RolName");
+
+                    b.ToTable("MenuRoles");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.MenuUsuario", b =>
+                {
+                    b.Property<int>("MenuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MenuId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("MenuUsuarios");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Pais", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1257,7 +1445,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Paises");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Persona", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Persona", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1336,7 +1524,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Personas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Proveedor", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Proveedor", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1388,7 +1576,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Proveedores");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Sector", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Sector", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1427,7 +1615,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Sectores");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Servicio", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Servicio", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1466,7 +1654,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Servicios");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Tarifa", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Tarifa", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1523,7 +1711,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Tarifas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TarifaDetalle", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TarifaDetalle", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1579,7 +1767,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("TarifaDetalles");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TipoActuacion", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TipoActuacion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1625,7 +1813,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("TipoActuaciones");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TipoContacto", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TipoContacto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1667,7 +1855,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("TipoContactos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TipoContrato", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TipoContrato", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1710,7 +1898,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("TipoContratos");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TipoExpediente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TipoExpediente", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1753,7 +1941,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("TipoExpediente");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Ubicacion", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Ubicacion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1821,148 +2009,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("Ubicaciones");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Usuario", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Apellidos")
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<int?>("CategoriaId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreadoFecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreadoPor")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DepartamentoId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Eliminado")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("EsCaptadorComisionista")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EsResponsableComercial")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EsResponsableExpediente")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EsResponsableFacturacion")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("EsSocio")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("ExpedienteId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Iniciales")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
-
-                    b.Property<DateTime?>("ModificadoFecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModificadoPor")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Nombre")
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoriaId");
-
-                    b.HasIndex("DepartamentoId");
-
-                    b.HasIndex("ExpedienteId");
-
-                    b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.UsuarioLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Info")
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("UsuarioLogs");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1975,9 +2022,8 @@ namespace LexERP.Server.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1986,7 +2032,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1999,9 +2045,8 @@ namespace LexERP.Server.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -2010,7 +2055,7 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -2023,9 +2068,8 @@ namespace LexERP.Server.Data.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -2034,13 +2078,13 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("AspNetUserLogins");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -2049,10 +2093,10 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("AspNetUserRoles");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -2085,45 +2129,38 @@ namespace LexERP.Server.Data.Migrations
                     b.ToTable("PersonaSector");
                 });
 
-            modelBuilder.Entity("LexERP.Server.Models.ApplicationRole", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
-
-                    b.HasDiscriminator().HasValue("ApplicationRole");
-                });
-
             modelBuilder.Entity("ClienteServicio", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Cliente", null)
+                    b.HasOne("LexERP.Server.Models.Cliente", null)
                         .WithMany()
                         .HasForeignKey("ClientesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Servicio", null)
+                    b.HasOne("LexERP.Server.Models.Servicio", null)
                         .WithMany()
                         .HasForeignKey("ServiciosId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Actuacion", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Actuacion", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.ConceptoEconomico", "ConceptoEconomico")
+                    b.HasOne("LexERP.Server.Models.ConceptoEconomico", "ConceptoEconomico")
                         .WithMany("Actuaciones")
                         .HasForeignKey("ConceptoEconomicoId");
 
-                    b.HasOne("LexERP.Shared.Entities.Expediente", "Expediente")
+                    b.HasOne("LexERP.Server.Models.Expediente", "Expediente")
                         .WithMany()
                         .HasForeignKey("ExpedienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.TipoActuacion", "TipoActuacion")
+                    b.HasOne("LexERP.Server.Models.TipoActuacion", "TipoActuacion")
                         .WithMany()
                         .HasForeignKey("TipoActuacionId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Usuario")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId");
 
@@ -2136,15 +2173,30 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Area", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ApplicationUser", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Departamento", "Departamento")
+                    b.HasOne("LexERP.Server.Models.Categoria", "Categoria")
+                        .WithMany()
+                        .HasForeignKey("CategoriaId");
+
+                    b.HasOne("LexERP.Server.Models.Departamento", "Departamento")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("DepartamentoId");
+
+                    b.Navigation("Categoria");
+
+                    b.Navigation("Departamento");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Area", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Departamento", "Departamento")
                         .WithMany()
                         .HasForeignKey("DepartamentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Area", "Parent")
+                    b.HasOne("LexERP.Server.Models.Area", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
@@ -2153,37 +2205,37 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Cliente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Cliente", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Captador")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Captador")
                         .WithMany()
                         .HasForeignKey("CaptadorId");
 
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Cliente", "Parent")
+                    b.HasOne("LexERP.Server.Models.Cliente", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
-                    b.HasOne("LexERP.Shared.Entities.Persona", "Persona")
+                    b.HasOne("LexERP.Server.Models.Persona", "Persona")
                         .WithMany()
                         .HasForeignKey("PersonaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "ResponsableComercial")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "ResponsableComercial")
                         .WithMany()
                         .HasForeignKey("ResponsableComercialId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "ResponsableFacturacion")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "ResponsableFacturacion")
                         .WithMany()
                         .HasForeignKey("ResponsableFacturacionId");
 
-                    b.HasOne("LexERP.Shared.Entities.Tarifa", "Tarifa")
+                    b.HasOne("LexERP.Server.Models.Tarifa", "Tarifa")
                         .WithMany()
                         .HasForeignKey("TarifaId");
 
@@ -2202,27 +2254,27 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Tarifa");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.ConceptoEconomico", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ConceptoEconomico", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Cliente", "Cliente")
+                    b.HasOne("LexERP.Server.Models.Cliente", "Cliente")
                         .WithMany()
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Factura", "Factura")
+                    b.HasOne("LexERP.Server.Models.Factura", "Factura")
                         .WithMany("LineasFactura")
                         .HasForeignKey("FacturaId");
 
-                    b.HasOne("LexERP.Shared.Entities.ConceptoEconomico", "Parent")
+                    b.HasOne("LexERP.Server.Models.ConceptoEconomico", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
-                    b.HasOne("LexERP.Shared.Entities.Proveedor", "Proveedor")
+                    b.HasOne("LexERP.Server.Models.Proveedor", "Proveedor")
                         .WithMany("Conceptos")
                         .HasForeignKey("ProveedorId");
 
@@ -2237,15 +2289,15 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Proveedor");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Contacto", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Contacto", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Persona", "Persona")
+                    b.HasOne("LexERP.Server.Models.Persona", "Persona")
                         .WithMany()
                         .HasForeignKey("PersonaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2256,31 +2308,31 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Persona");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Contrato", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Contrato", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Cliente", "Cliente")
+                    b.HasOne("LexERP.Server.Models.Cliente", "Cliente")
                         .WithMany("Contratos")
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.FormaDePago", "FormaDePago")
+                    b.HasOne("LexERP.Server.Models.FormaDePago", "FormaDePago")
                         .WithMany()
                         .HasForeignKey("FormaDePagoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Tarifa", "Tarifa")
+                    b.HasOne("LexERP.Server.Models.Tarifa", "Tarifa")
                         .WithMany()
                         .HasForeignKey("TarifaId");
 
-                    b.HasOne("LexERP.Shared.Entities.TipoContrato", "TipoContrato")
+                    b.HasOne("LexERP.Server.Models.TipoContrato", "TipoContrato")
                         .WithMany()
                         .HasForeignKey("TipoContratoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "UsuarioControl")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "UsuarioControl")
                         .WithMany()
                         .HasForeignKey("UsuarioControlId");
 
@@ -2295,15 +2347,15 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("UsuarioControl");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.DatoContacto", b =>
+            modelBuilder.Entity("LexERP.Server.Models.DatoContacto", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Persona", "Persona")
+                    b.HasOne("LexERP.Server.Models.Persona", "Persona")
                         .WithMany("DatosContacto")
                         .HasForeignKey("PersonaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.TipoContacto", "TipoContacto")
+                    b.HasOne("LexERP.Server.Models.TipoContacto", "TipoContacto")
                         .WithMany()
                         .HasForeignKey("TipoContactoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2314,53 +2366,53 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("TipoContacto");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Expediente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Expediente", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Area", "Area")
+                    b.HasOne("LexERP.Server.Models.Area", "Area")
                         .WithMany()
                         .HasForeignKey("AreaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Cliente", "Cliente")
+                    b.HasOne("LexERP.Server.Models.Cliente", "Cliente")
                         .WithMany()
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("LexERP.Shared.Entities.Contrato", "Contrato")
+                    b.HasOne("LexERP.Server.Models.Contrato", "Contrato")
                         .WithMany("Expedientes")
                         .HasForeignKey("ContratoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId");
 
-                    b.HasOne("LexERP.Shared.Entities.Expediente", "Parent")
+                    b.HasOne("LexERP.Server.Models.Expediente", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "ResponsableComercial")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "ResponsableComercial")
                         .WithMany()
                         .HasForeignKey("ResponsableComercialId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "ResponsableFacturacion")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "ResponsableFacturacion")
                         .WithMany()
                         .HasForeignKey("ResponsableFacturacionId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Responsable")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Responsable")
                         .WithMany()
                         .HasForeignKey("ResponsableId");
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "SocioResponsable")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "SocioResponsable")
                         .WithMany()
                         .HasForeignKey("SocioResponsableId");
 
-                    b.HasOne("LexERP.Shared.Entities.Tarifa", "Tarifa")
+                    b.HasOne("LexERP.Server.Models.Tarifa", "Tarifa")
                         .WithMany()
                         .HasForeignKey("TarifaId");
 
-                    b.HasOne("LexERP.Shared.Entities.TipoExpediente", "TipoExpediente")
+                    b.HasOne("LexERP.Server.Models.TipoExpediente", "TipoExpediente")
                         .WithMany()
                         .HasForeignKey("TipoExpedienteId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2389,23 +2441,42 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("TipoExpediente");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Factura", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ExpedienteUsuario", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Cliente", "Cliente")
+                    b.HasOne("LexERP.Server.Models.Expediente", "Expediente")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("ExpedienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Expediente");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Factura", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Cliente", "Cliente")
                         .WithMany("Facturas")
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Factura", "FacturaRectificada")
+                    b.HasOne("LexERP.Server.Models.Factura", "FacturaRectificada")
                         .WithMany()
                         .HasForeignKey("FacturaRectificadaId");
 
-                    b.HasOne("LexERP.Shared.Entities.Pais", "Pais")
+                    b.HasOne("LexERP.Server.Models.Pais", "Pais")
                         .WithMany()
                         .HasForeignKey("PaisId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2420,9 +2491,59 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Pais");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Pais", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Log", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Idioma", "Idioma")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Menu", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Menu", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.MenuRol", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Menu", "Menu")
+                        .WithMany()
+                        .HasForeignKey("MenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Menu");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.MenuUsuario", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Menu", "Menu")
+                        .WithMany()
+                        .HasForeignKey("MenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Menu");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("LexERP.Server.Models.Pais", b =>
+                {
+                    b.HasOne("LexERP.Server.Models.Idioma", "Idioma")
                         .WithMany()
                         .HasForeignKey("IdiomaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2431,19 +2552,19 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Idioma");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Persona", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Persona", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Cliente", null)
+                    b.HasOne("LexERP.Server.Models.Cliente", null)
                         .WithMany("Contactos")
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("LexERP.Shared.Entities.Idioma", "Idioma")
+                    b.HasOne("LexERP.Server.Models.Idioma", "Idioma")
                         .WithMany()
                         .HasForeignKey("IdiomaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Ubicacion", "UbicacionPrincipal")
+                    b.HasOne("LexERP.Server.Models.Ubicacion", "UbicacionPrincipal")
                         .WithMany()
                         .HasForeignKey("UbicacionPrincipalId");
 
@@ -2452,15 +2573,15 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("UbicacionPrincipal");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Proveedor", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Proveedor", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Persona", "Persona")
+                    b.HasOne("LexERP.Server.Models.Persona", "Persona")
                         .WithMany()
                         .HasForeignKey("PersonaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2471,9 +2592,9 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Persona");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Tarifa", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Tarifa", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Empresa", "Empresa")
+                    b.HasOne("LexERP.Server.Models.Empresa", "Empresa")
                         .WithMany()
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2482,19 +2603,19 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Empresa");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.TarifaDetalle", b =>
+            modelBuilder.Entity("LexERP.Server.Models.TarifaDetalle", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Categoria", "Categoria")
+                    b.HasOne("LexERP.Server.Models.Categoria", "Categoria")
                         .WithMany()
                         .HasForeignKey("CategoriaId");
 
-                    b.HasOne("LexERP.Shared.Entities.Tarifa", "Tarifa")
+                    b.HasOne("LexERP.Server.Models.Tarifa", "Tarifa")
                         .WithMany()
                         .HasForeignKey("TarifaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Usuario")
+                    b.HasOne("LexERP.Server.Models.ApplicationUser", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId");
 
@@ -2505,61 +2626,31 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Ubicacion", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Ubicacion", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Pais", "Pais")
+                    b.HasOne("LexERP.Server.Models.Pais", "Pais")
                         .WithMany()
                         .HasForeignKey("PaisId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Persona", null)
+                    b.HasOne("LexERP.Server.Models.Persona", null)
                         .WithMany("Ubicaciones")
                         .HasForeignKey("PersonaId");
 
                     b.Navigation("Pais");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Usuario", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Categoria", "Categoria")
-                        .WithMany()
-                        .HasForeignKey("CategoriaId");
-
-                    b.HasOne("LexERP.Shared.Entities.Departamento", "Departamento")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("DepartamentoId");
-
-                    b.HasOne("LexERP.Shared.Entities.Expediente", null)
-                        .WithMany("Usuarios")
-                        .HasForeignKey("ExpedienteId");
-
-                    b.Navigation("Categoria");
-
-                    b.Navigation("Departamento");
-                });
-
-            modelBuilder.Entity("LexERP.Shared.Entities.UsuarioLog", b =>
-                {
-                    b.HasOne("LexERP.Shared.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("LexERP.Server.Models.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.HasOne("LexERP.Server.Models.ApplicationUser", null)
                         .WithMany()
@@ -2568,7 +2659,7 @@ namespace LexERP.Server.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.HasOne("LexERP.Server.Models.ApplicationUser", null)
                         .WithMany()
@@ -2577,9 +2668,9 @@ namespace LexERP.Server.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("LexERP.Server.Models.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2592,7 +2683,7 @@ namespace LexERP.Server.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.HasOne("LexERP.Server.Models.ApplicationUser", null)
                         .WithMany()
@@ -2603,25 +2694,25 @@ namespace LexERP.Server.Data.Migrations
 
             modelBuilder.Entity("PersonaSector", b =>
                 {
-                    b.HasOne("LexERP.Shared.Entities.Persona", null)
+                    b.HasOne("LexERP.Server.Models.Persona", null)
                         .WithMany()
                         .HasForeignKey("PersonasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LexERP.Shared.Entities.Sector", null)
+                    b.HasOne("LexERP.Server.Models.Sector", null)
                         .WithMany()
                         .HasForeignKey("SectoresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Area", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Area", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Cliente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Cliente", b =>
                 {
                     b.Navigation("Children");
 
@@ -2632,43 +2723,43 @@ namespace LexERP.Server.Data.Migrations
                     b.Navigation("Facturas");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.ConceptoEconomico", b =>
+            modelBuilder.Entity("LexERP.Server.Models.ConceptoEconomico", b =>
                 {
                     b.Navigation("Actuaciones");
 
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Contrato", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Contrato", b =>
                 {
                     b.Navigation("Expedientes");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Departamento", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Departamento", b =>
                 {
                     b.Navigation("Usuarios");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Expediente", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Expediente", b =>
                 {
                     b.Navigation("Children");
 
                     b.Navigation("Usuarios");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Factura", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Factura", b =>
                 {
                     b.Navigation("LineasFactura");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Persona", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Persona", b =>
                 {
                     b.Navigation("DatosContacto");
 
                     b.Navigation("Ubicaciones");
                 });
 
-            modelBuilder.Entity("LexERP.Shared.Entities.Proveedor", b =>
+            modelBuilder.Entity("LexERP.Server.Models.Proveedor", b =>
                 {
                     b.Navigation("Conceptos");
                 });

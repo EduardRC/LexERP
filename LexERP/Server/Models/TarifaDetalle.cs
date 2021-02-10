@@ -23,6 +23,6 @@ namespace LexERP.Server.Models
 
         public virtual Tarifa Tarifa { get; set; }
         public virtual Categoria Categoria { get; set; }
-        public virtual Usuario Usuario { get; set; }
+        public virtual ApplicationUser Usuario { get; set; }
     }
 }

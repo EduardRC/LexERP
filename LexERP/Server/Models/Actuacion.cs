@@ -29,7 +29,7 @@ namespace LexERP.Server.Models
 
         public int? ConceptoEconomicoId { get; set; }
 
-        public virtual Usuario Usuario { get; set; }
+        public virtual ApplicationUser Usuario { get; set; }
         public virtual Expediente Expediente { get; set; }
         public virtual TipoActuacion TipoActuacion { get; set; }
         public virtual ConceptoEconomico ConceptoEconomico { get; set; }

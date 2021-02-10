@@ -38,7 +38,7 @@ namespace LexERP.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<UsuarioDTOlist>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Usuarios.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.Users.Where(x => x.Eliminado == false).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
@@ -91,7 +91,7 @@ namespace LexERP.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioDTO>> Get(int id)
         {
-            var usuario = await _context.Usuarios.Where(x => x.Id == id && x.Eliminado == false)
+            var usuario = await _context.Users.Where(x => x.Id == id && x.Eliminado == false)
                                 .Include(x => x.Departamento)
                                 .Include(x => x.Categoria)
                                 .FirstOrDefaultAsync();
@@ -149,17 +149,17 @@ namespace LexERP.Server.Controllers
         {
             // al querer eliminiar el usuario, lo que haremos sera deshabilitarlo,
             // para no perder los enlaces que hay asignados a el,
-            // renombramos tambien el email para evitar problemas si en el futuro se vuelve a crear con mismo email
-            // lo que si borramos es la cuenta que permite el acceso por IdentityServer4
+            // borramos tambien el email y username para evitar problemas si en el futuro se vuelve a crear con mismo email
 
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var usuario = await _context.Users.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (usuario == null) { return NotFound(); }
 
-            var user = _userManager.FindByNameAsync(usuario.Email).Result;
-            await _userManager.DeleteAsync(user);
-
+            usuario.LockoutEnd = DateTime.MaxValue;
             usuario.Email = "";
+            usuario.NormalizedEmail = "";
+            usuario.UserName = "";
+            usuario.NormalizedUserName = "";
             usuario.ModificadoFecha = DateTime.Now;
             usuario.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
             usuario.Eliminado = true;
@@ -174,7 +174,34 @@ namespace LexERP.Server.Controllers
         public async Task<ActionResult> Post(UsuarioDTO usuarioDTO)
         {
             // crear usuario en Identity
-            var applicationUser = new ApplicationUser { UserName = usuarioDTO.Email, Email = usuarioDTO.Email };
+            var applicationUser = new ApplicationUser 
+            { 
+                UserName = usuarioDTO.Email, 
+                Email = usuarioDTO.Email,
+                Iniciales = usuarioDTO.Iniciales,
+                Nombre = usuarioDTO.Nombre,
+                Apellidos = usuarioDTO.Apellidos,
+                EsSocio = usuarioDTO.EsSocio,
+                EsResponsableExpediente = usuarioDTO.EsResponsableExpediente,
+                EsResponsableFacturacion = usuarioDTO.EsResponsableFacturacion,
+                EsResponsableComercial = usuarioDTO.EsResponsableComercial,
+                EsCaptadorComisionista = usuarioDTO.EsCaptadorComisionista,
+                Activo = true,
+                CreadoFecha = DateTime.Now,
+                CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
+            };
+
+            if (usuarioDTO.Departamento.Id != 0)
+            {
+                applicationUser.DepartamentoId = usuarioDTO.Departamento.Id;
+            }
+
+            if (usuarioDTO.Categoria.Id != 0)
+            {
+                applicationUser.CategoriaId = usuarioDTO.Categoria.Id;
+            }
+
+
             var ir = await _userManager.CreateAsync(applicationUser, usuarioDTO.Password);
 
             if (ir.Succeeded)
@@ -182,39 +209,6 @@ namespace LexERP.Server.Controllers
                 // asignar role
                 var createdUser = await _userManager.FindByNameAsync(usuarioDTO.Email);
                 await _userManager.AddToRoleAsync(createdUser, usuarioDTO.rolName);
-
-                // crear usuario para gestion
-                var usuario = new Usuario
-                {
-                    Iniciales = usuarioDTO.Iniciales,
-                    Nombre = usuarioDTO.Nombre,
-                    Apellidos = usuarioDTO.Apellidos,
-                    Email = usuarioDTO.Email,
-                    EsSocio = usuarioDTO.EsSocio,
-                    EsResponsableExpediente = usuarioDTO.EsResponsableExpediente,
-                    EsResponsableFacturacion = usuarioDTO.EsResponsableFacturacion,
-                    EsResponsableComercial = usuarioDTO.EsResponsableComercial,
-                    EsCaptadorComisionista = usuarioDTO.EsCaptadorComisionista,
-                    Activo = true,
-                    CreadoFecha = DateTime.Now,
-                    CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
-                };
-
-                if (usuarioDTO.Departamento.Id != 0)
-                {
-                    usuario.DepartamentoId = usuarioDTO.Departamento.Id;
-                }
-
-                if (usuarioDTO.Categoria.Id != 0)
-                {
-                    usuario.CategoriaId = usuarioDTO.Categoria.Id;
-                }
-
-                _context.Add(usuario);
-                await _context.SaveChangesAsync();
-
-                applicationUser.UsuarioId = usuario.Id;
-                await _context.SaveChangesAsync();
 
                 return NoContent();
             }
@@ -228,7 +222,7 @@ namespace LexERP.Server.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(UsuarioDTO usuarioDTO)
         {
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == usuarioDTO.Id && x.Eliminado == false);
+            var usuario = await _context.Users.FirstOrDefaultAsync(x => x.Id == usuarioDTO.Id && x.Eliminado == false);
 
             if (usuario == null) { return NotFound(); }
 
@@ -320,7 +314,7 @@ namespace LexERP.Server.Controllers
         [HttpPut("asignarRol")]
         public async Task<ActionResult> AsignarRolUsuario(RolDTOuser editarRolDTO)
         {
-            var usuario = await _userManager.FindByIdAsync(editarRolDTO.UserId);
+            var usuario = await _userManager.FindByIdAsync(editarRolDTO.UserId.ToString());
             await _userManager.AddToRoleAsync(usuario, editarRolDTO.RoleNombre);
             return NoContent();
         }
@@ -328,7 +322,7 @@ namespace LexERP.Server.Controllers
         [HttpPut("removerRol")]
         public async Task<ActionResult> RemoverRolUsuario(RolDTOuser editarRolDTO)
         {
-            var usuario = await _userManager.FindByIdAsync(editarRolDTO.UserId);
+            var usuario = await _userManager.FindByIdAsync(editarRolDTO.UserId.ToString());
             await _userManager.RemoveFromRoleAsync(usuario, editarRolDTO.RoleNombre);
             return NoContent();
         }
