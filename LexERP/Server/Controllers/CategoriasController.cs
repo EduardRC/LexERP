@@ -1,8 +1,8 @@
 ﻿using IdentityModel;
 using LexERP.Server.Data;
 using LexERP.Server.Helpers;
+using LexERP.Server.Models;
 using LexERP.Shared.DTOs;
-using LexERP.Shared.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

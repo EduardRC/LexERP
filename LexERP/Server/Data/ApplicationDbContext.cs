@@ -1,6 +1,5 @@
 ﻿using IdentityServer4.EntityFramework.Options;
 using LexERP.Server.Models;
-using LexERP.Shared.Entities;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

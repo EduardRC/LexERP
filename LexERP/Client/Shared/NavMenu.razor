@@ -1,5 +1,4 @@
-﻿@using LexERP.Shared.Entities
-@inject IRepositorio repositorio
+﻿@inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 
 <div class="top-row pl-4 navbar navbar-dark">
@@ -57,7 +56,7 @@
 @code {
     private bool collapseNavMenu = true;
 
-    private List<Menu> menu;
+    private List<MenuDTO> menu;
     private int clickedMenu = 0;
     private int prevClickedMenu = 0;
     private bool expandSubNav;
@@ -70,7 +69,7 @@
         collapseNavMenu = (!collapseNavMenu && !expandSubNav);
     }
 
-    private void GetIsClicked(Menu menu)
+    private void GetIsClicked(MenuDTO menu)
     {
         clickedMenu = menu.Id;
 
@@ -97,7 +96,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await repositorio.Get<List<Menu>>("api/menu");
+        var httpResponse = await repositorio.Get<List<MenuDTO>>("api/menu");
 
         if (httpResponse.Error)
         {

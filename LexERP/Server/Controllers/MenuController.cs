@@ -1,5 +1,5 @@
 ﻿using LexERP.Server.Data;
-using LexERP.Shared.Entities;
+using LexERP.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,9 +23,17 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Menu>>> Get()
+        public async Task<ActionResult<List<MenuDTO>>> Get()
         {
-            return await _context.Menus.ToListAsync();
+            return await _context.Menus
+                .Select(x=> new MenuDTO {
+                    Id=x.Id, 
+                    ParentId=x.ParentId, 
+                    PageName=x.PageName, 
+                    MenuName=x.MenuName, 
+                    IconName=x.IconName, 
+                    Position=x.Position })
+                .ToListAsync();
         }
 
     }

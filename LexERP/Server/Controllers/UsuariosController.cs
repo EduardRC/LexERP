@@ -11,7 +11,6 @@ using LexERP.Server.Data;
 using LexERP.Server.Helpers;
 using LexERP.Server.Models;
 using LexERP.Shared.DTOs;
-using LexERP.Shared.Entities;
 using IdentityServer4.Models;
 using IdentityModel;
 

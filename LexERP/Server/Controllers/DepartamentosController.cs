@@ -7,8 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using LexERP.Server.Data;
 using LexERP.Server.Helpers;
+using LexERP.Server.Models;
 using LexERP.Shared.DTOs;
-using LexERP.Shared.Entities;
 using IdentityModel;
 
 namespace LexERP.Server.Controllers
