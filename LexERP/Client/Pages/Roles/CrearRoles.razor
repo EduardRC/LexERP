@@ -1,0 +1,42 @@
+﻿@page "/roles/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Crear Rol</h3>
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <FormularioRoles Item="item"
+                     OnValidSubmit="Crear" />
+}
+
+@code {
+    private RolDTO item = new RolDTO();
+
+    private bool inicializado = false;
+
+    protected override void OnInitialized()
+    {
+        inicializado = true;
+    }
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/roles", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/roles");
+        }
+    }
+}

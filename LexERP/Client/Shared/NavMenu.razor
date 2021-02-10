@@ -20,24 +20,34 @@
         <ul class="nav flex-column">
             @foreach (var item in menu.Where(x => x.ParentId == null).OrderBy(x=>x.Position))
             {
-                <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="@item.PageName" @onclick="()=>GetIsClicked(item)">
+            <li class="nav-item px-3">
+                @if (item.PageName != "" || item.MenuName == "Inicio")
+                {
+                    <NavLink class="nav-link" href="@item.PageName" @onclick="()=>GetIsClicked(item)" Match="NavLinkMatch.All">
                         <span class="@item.IconName" aria-hidden="true"></span> @item.MenuName
                     </NavLink>
-                    <ul class="nav flex-column">
-                        @foreach (var subItem in menu.Where(x => x.ParentId == item.Id).OrderBy(x => x.Position))
+                }
+                else
+                {
+                    //Creada esta opcion, sin "href" para cuando no hay enlace (es un submenu), para que no lo enlace con el INICIO
+                    <NavLink class="nav-link" @onclick="()=>GetIsClicked(item)">
+                        <span class="@item.IconName" aria-hidden="true"></span> @item.MenuName
+                    </NavLink>
+                }
+                <ul class="nav flex-column">
+                    @foreach (var subItem in menu.Where(x => x.ParentId == item.Id).OrderBy(x => x.Position))
+                    {
+                        @if (expandSubNav && item.Id == clickedMenu)
                         {
-                            @if (expandSubNav && item.Id == clickedMenu)
-                            {
-                                <li class="nav-item px-3">
-                                    <NavLink class="nav-link" href="@subItem.PageName">
-                                        <span class="@subItem.IconName" aria-hidden="true"></span> @subItem.MenuName
-                                    </NavLink>
-                                </li>
-                            }
+                            <li class="nav-item px-3">
+                                <NavLink class="nav-link" href="@subItem.PageName">
+                                    <span class="@subItem.IconName" aria-hidden="true"></span> @subItem.MenuName
+                                </NavLink>
+                            </li>
                         }
-                    </ul>
-                </li>
+                    }
+                </ul>
+            </li>
             }
         </ul>
     }
@@ -98,6 +108,5 @@
             menu = httpResponse.Response;
         }
     }
-
 
 }

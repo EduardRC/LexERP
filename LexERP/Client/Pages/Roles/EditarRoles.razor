@@ -1,0 +1,90 @@
+﻿@page "/roles/editar/{Id}"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "admin")]
+
+
+@if (item == null)
+{
+    <Cargando />
+}
+else
+{
+    <h3>Editar @item.Nombre</h3>
+    <div>
+        <button @onclick="@(()=>EliminarRegistro())" class="btn btn-primary">Borrar rol</button>
+        <br />
+        <br />
+    </div>
+
+    <FormularioRoles Item="item"
+                     ModoEdicion=true
+                     OnValidSubmit="Guardar" />
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    [Parameter] public string Id { get; set; }
+
+    private RolDTO item;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.Get<RolDTO>($"api/roles/edit/{Id}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            item = httpResponse.Response;
+        }
+    }
+
+    private async Task Guardar()
+    {
+        var httpResponse = await repositorio.Put("api/roles", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/roles");
+        }
+    }
+
+    private async Task EliminarRegistro()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar el rol {item.Nombre.ToUpper()}?");
+
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var confirmationModal = Modal.Show<ConfirmarEliminacion>("", parameters, options);
+        var result = await confirmationModal.Result;
+
+        if (!result.Cancelled)
+        {
+            var httpResponse = await repositorio.Delete($"api/roles/{item.RoleId}");
+
+            if (httpResponse.Error)
+            {
+                await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+            }
+            else
+            {
+                navigationManager.NavigateTo("/roles");
+            }
+        }
+    }
+}

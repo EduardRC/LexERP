@@ -186,7 +186,7 @@ else
 
     private async Task CargarRoles()
     {
-        var httpResponse = await repositorio.Get<List<RolDTO>>("api/usuarios/roles");
+        var httpResponse = await repositorio.Get<List<RolDTO>>("api/roles/lista");
 
         if (httpResponse.Error)
         {

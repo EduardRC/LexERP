@@ -1,0 +1,31 @@
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+@if (Item==null)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12 col-lg-8 col-xl-6">
+                 <div class="form-group">
+                    <label>Nombre:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Nombre" />
+                        <ValidationMessage For="@(() => Item.Nombre)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public RolDTO Item { get; set; }
+    [Parameter] public Boolean ModoEdicion { get; set; } = false;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}

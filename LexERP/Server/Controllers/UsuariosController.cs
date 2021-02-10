@@ -171,12 +171,6 @@ namespace LexERP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet("roles")]
-        public async Task<ActionResult<List<RolDTO>>> GetRoles()
-        {
-            return await _context.Roles.Select(x => new RolDTO() { RoleId = x.Id, Nombre = x.Name }).ToListAsync();
-        }
-
         [HttpPost]
         public async Task<ActionResult> Post(UsuarioDTO usuarioDTO)
         {

@@ -1,8 +1,6 @@
 ﻿@page "/usuarios"
 @inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
-@inject NavigationManager navigationManager
-@inject IJSRuntime js
 @attribute [Authorize(Roles = "admin")]
 
 <IndiceGenerico @ref="child"
