@@ -94,10 +94,11 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet("lista")]
-        public async Task<ActionResult<List<EmpresaDTOlist>>> Get()
+        [HttpGet("lista/{id}")]
+        public async Task<ActionResult<List<EmpresaDTOlist>>> Lista(int id=0)
         {
             return await _context.Empresas
-                .Where(x => x.Eliminado == false && x.Activo == true)
+                .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
                 .OrderBy(x => x.RazonSocial)
                 .Select(x => new EmpresaDTOlist
                 {
@@ -163,7 +164,7 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar esta empresa, esta asignada a otros registros");
+                return Forbid("No se puede eliminar esta 'Empresa', esta asignada a otros registros");
             }
 
             var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
@@ -180,7 +181,7 @@ namespace LexERP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet("CanDelete{id}")]
+        [HttpGet("CanDelete/{id}")]
         public async Task<bool> CanDelete(int id)
         {
             // Mirar si se puede eliminar el registro

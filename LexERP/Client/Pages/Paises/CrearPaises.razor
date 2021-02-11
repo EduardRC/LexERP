@@ -1,0 +1,28 @@
+﻿@page "/paises/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear País</h3>
+
+<FormularioPaises Item="item"
+                   OnValidSubmit="Crear" />
+
+@code {
+    private PaisDTO item = new PaisDTO { Idioma = new IdiomaDTO()};
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/paises", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/paises");
+        }
+    }
+}

@@ -99,8 +99,13 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<ActionResult> Delete(int id)
         {
+            if (!await CanDelete(id))
+            {
+                return Forbid("No se puede eliminar este 'Rol', esta asignada a otros registros");
+            }
+
             return NoContent();
         }
 
@@ -130,6 +135,15 @@ namespace LexERP.Server.Controllers
             await _roleManager.UpdateAsync(rol);
 
             return NoContent();
+        }
+
+        [HttpGet("CanDelete/{id}")]
+        public async Task<bool> CanDelete(int id)
+        {
+            // Mirar si se puede eliminar el registro
+            // para bloquear si hay dependencias existentes
+
+            return true;
         }
 
     }

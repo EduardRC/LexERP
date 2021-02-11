@@ -16,26 +16,29 @@ namespace LexERP.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class CategoriasController : Controller
+    public class PaisesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoriasController(ApplicationDbContext context)
+        public PaisesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CategoriaDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
+        public async Task<ActionResult<List<PaisDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Categorias.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.Paises.Where(x => x.Eliminado == false)
+                .Include(x=>x.Idioma)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
                 var searchString = parametrosBusqueda.Buscar.ToLower();
 
                 queryable = queryable
-                    .Where(x => x.Descripcion.ToLower().Contains(searchString));
+                    .Where(x => x.Nombre.ToLower().Contains(searchString) ||
+                                x.Idioma.Descripcion.ToLower().Contains(searchString));
             }
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
@@ -43,16 +46,16 @@ namespace LexERP.Server.Controllers
                 switch (parametrosBusqueda.Orden.ToLower())
                 {
                     case "descripcion_desc":
-                        queryable = queryable.OrderByDescending(s => s.Descripcion);
+                        queryable = queryable.OrderByDescending(s => s.Nombre);
                         break;
-                    case "importe":
-                        queryable = queryable.OrderBy(s => s.ImporteHoraBase);
+                    case "idioma":
+                        queryable = queryable.OrderBy(s => s.Idioma.Descripcion);
                         break;
-                    case "importe_desc":
-                        queryable = queryable.OrderByDescending(s => s.ImporteHoraBase);
+                    case "idioma_desc":
+                        queryable = queryable.OrderByDescending(s => s.Idioma.Descripcion);
                         break;
                     default:
-                        queryable = queryable.OrderBy(s => s.Descripcion);
+                        queryable = queryable.OrderBy(s => s.Nombre);
                         break;
                 }
             }
@@ -60,53 +63,54 @@ namespace LexERP.Server.Controllers
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
 
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
-                .Select(x => new CategoriaDTO
+                .Select(x => new PaisDTO
                 {
                     Id = x.Id,
-                    Descripcion = x.Descripcion,
-                    ImporteHoraBase = x.ImporteHoraBase,
+                    Nombre = x.Nombre,
+                    Idioma = new IdiomaDTO { Descripcion = x.Idioma.Descripcion },
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CategoriaDTO>> Get(int id)
+        public async Task<ActionResult<PaisDTO>> Get(int id)
         {
-            var element = await _context.Categorias.Where(x => x.Id == id && x.Eliminado == false)
+            var element = await _context.Paises.Where(x => x.Id == id && x.Eliminado == false)
+                .Include(x => x.Idioma)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new CategoriaDTO
+            return new PaisDTO
             {
                 Id = element.Id,
-                Descripcion = element.Descripcion,
-                ImporteHoraBase = element.ImporteHoraBase,
+                Nombre = element.Nombre,
+                Idioma = new IdiomaDTO {Id = element.IdiomaId},
                 Activo = element.Activo
             };
         }
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<CategoriaDTOmin>>> Lista(int id=0)
+        public async Task<ActionResult<List<PaisDTO>>> Lista(int id = 0)
         {
-            return await _context.Categorias
+            return await _context.Paises
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
-                .OrderBy(x => x.Descripcion)
-                .Select(x => new CategoriaDTOmin
+                .OrderBy(x => x.Nombre)
+                .Select(x => new PaisDTO
                 {
                     Id = x.Id,
-                    Descripcion = x.Descripcion
+                    Nombre = x.Nombre
                 }).ToListAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(CategoriaDTO elementDTO)
+        public async Task<ActionResult<int>> Post(PaisDTO elementDTO)
         {
-            var element = new Categoria
+            var element = new Pais
             {
-                Descripcion = elementDTO.Descripcion,
-                ImporteHoraBase = elementDTO.ImporteHoraBase,
+                Nombre = elementDTO.Nombre,
+                IdiomaId = elementDTO.Idioma.Id,
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
@@ -119,14 +123,14 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(CategoriaDTO elementDTO)
+        public async Task<ActionResult> Put(PaisDTO elementDTO)
         {
-            var element = await _context.Categorias.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
+            var element = await _context.Paises.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
-            element.Descripcion = elementDTO.Descripcion;
-            element.ImporteHoraBase = elementDTO.ImporteHoraBase;
+            element.Nombre = elementDTO.Nombre;
+            element.IdiomaId = elementDTO.Idioma.Id;
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
@@ -145,10 +149,10 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar esta 'Categoría', esta asignada a otros registros");
+                return Forbid("No se puede eliminar este 'País', esta asignado a otros registros");
             }
 
-            var element = await _context.Categorias.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.Paises.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -171,5 +175,7 @@ namespace LexERP.Server.Controllers
             return true;
         }
 
+
     }
 }
+

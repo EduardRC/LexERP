@@ -1,0 +1,28 @@
+﻿@page "/sectores/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Sector</h3>
+
+<FormularioSectores Item="item"
+                   OnValidSubmit="Crear" />
+
+@code {
+    private SectorDTO item = new SectorDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/sectores", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/sectores");
+        }
+    }
+}

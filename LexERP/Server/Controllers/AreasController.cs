@@ -87,7 +87,7 @@ namespace LexERP.Server.Controllers
 
             if (element == null) { return NotFound(); }
 
-            var area = new AreaDTO
+            var elementDTO = new AreaDTO
             {
                 Id = element.Id,
                 Abreviatura = element.Abreviatura,
@@ -98,23 +98,24 @@ namespace LexERP.Server.Controllers
 
             if (element.Departamento!=null)
             {
-                area.Departamento = new DepartamentoDTOmin { Id = element.Departamento.Id, Descripcion = element.Departamento.Descripcion };
+                elementDTO.Departamento = new DepartamentoDTOmin { Id = element.Departamento.Id, Descripcion = element.Departamento.Descripcion };
             }
 
             if (element.Parent!=null)
             {
-                area.Parent = new AreaDTOmin { Id = element.Parent.Id, Descripcion = element.Parent.Descripcion };
+                elementDTO.Parent = new AreaDTOmin { Id = element.Parent.Id, Descripcion = element.Parent.Descripcion };
             }
 
-            return area;
+            return elementDTO;
         }
 
         [HttpGet("lista")]
-        public async Task<ActionResult<List<AreaDTOmin>>> Get()
+        [HttpGet("lista/{id}")]
+        public async Task<ActionResult<List<AreaDTOmin>>> Lista(int id=0)
         {
             return await _context.Areas
-                .Where(x => x.Eliminado == false && x.Activo == true)
-                .OrderBy(x => x.Orden)
+                .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Descripcion)
                 .Select(x => new AreaDTOmin
                 {
                     Id = x.Id,
@@ -180,6 +181,11 @@ namespace LexERP.Server.Controllers
             // al querer eliminiar el registro, lo que haremos sera deshabilitarlo,
             // para no perder los enlaces que hay asignados a el,
 
+            if (!await CanDelete(id))
+            {
+                return Forbid("No se puede eliminar esta 'Área', esta asignada a otros registros");
+            }
+
             var element = await _context.Areas.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
@@ -194,6 +200,13 @@ namespace LexERP.Server.Controllers
             return NoContent();
         }
 
+        [HttpGet("CanDelete/{id}")]
+        public async Task<bool> CanDelete(int id)
+        {
+            // Mirar si se puede eliminar el registro
+            // para bloquear si hay dependencias existentes
 
+            return true;
+        }
     }
 }

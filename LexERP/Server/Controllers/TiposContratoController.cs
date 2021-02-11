@@ -16,26 +16,27 @@ namespace LexERP.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class CategoriasController : Controller
+    public class TiposContratoController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoriasController(ApplicationDbContext context)
+        public TiposContratoController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CategoriaDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
+        public async Task<ActionResult<List<TipoContratoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Categorias.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.TipoContratos.Where(x => x.Eliminado == false).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
                 var searchString = parametrosBusqueda.Buscar.ToLower();
 
                 queryable = queryable
-                    .Where(x => x.Descripcion.ToLower().Contains(searchString));
+                    .Where(x => x.Descripcion.ToLower().Contains(searchString) ||
+                                x.Abreviatura.ToLower().Contains(searchString));
             }
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
@@ -45,11 +46,11 @@ namespace LexERP.Server.Controllers
                     case "descripcion_desc":
                         queryable = queryable.OrderByDescending(s => s.Descripcion);
                         break;
-                    case "importe":
-                        queryable = queryable.OrderBy(s => s.ImporteHoraBase);
+                    case "abreviatura":
+                        queryable = queryable.OrderBy(s => s.Abreviatura);
                         break;
-                    case "importe_desc":
-                        queryable = queryable.OrderByDescending(s => s.ImporteHoraBase);
+                    case "abreviatura_desc":
+                        queryable = queryable.OrderByDescending(s => s.Abreviatura);
                         break;
                     default:
                         queryable = queryable.OrderBy(s => s.Descripcion);
@@ -60,53 +61,54 @@ namespace LexERP.Server.Controllers
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
 
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
-                .Select(x => new CategoriaDTO
+                .Select(x => new TipoContratoDTO
                 {
                     Id = x.Id,
+                    Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion,
-                    ImporteHoraBase = x.ImporteHoraBase,
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CategoriaDTO>> Get(int id)
+        public async Task<ActionResult<TipoContratoDTO>> Get(int id)
         {
-            var element = await _context.Categorias.Where(x => x.Id == id && x.Eliminado == false)
+            var element = await _context.TipoContratos.Where(x => x.Id == id && x.Eliminado == false)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new CategoriaDTO
+            return new TipoContratoDTO
             {
                 Id = element.Id,
+                Abreviatura = element.Abreviatura,
                 Descripcion = element.Descripcion,
-                ImporteHoraBase = element.ImporteHoraBase,
                 Activo = element.Activo
             };
         }
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<CategoriaDTOmin>>> Lista(int id=0)
+        public async Task<ActionResult<List<TipoContratoDTO>>> Lista(int id=0)
         {
-            return await _context.Categorias
+            return await _context.TipoContratos
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
                 .OrderBy(x => x.Descripcion)
-                .Select(x => new CategoriaDTOmin
+                .Select(x => new TipoContratoDTO
                 {
                     Id = x.Id,
+                    Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion
                 }).ToListAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(CategoriaDTO elementDTO)
+        public async Task<ActionResult<int>> Post(TipoContratoDTO elementDTO)
         {
-            var element = new Categoria
+            var element = new TipoContrato
             {
+                Abreviatura = elementDTO.Abreviatura,
                 Descripcion = elementDTO.Descripcion,
-                ImporteHoraBase = elementDTO.ImporteHoraBase,
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
@@ -119,14 +121,14 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(CategoriaDTO elementDTO)
+        public async Task<ActionResult> Put(TipoContratoDTO elementDTO)
         {
-            var element = await _context.Categorias.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
+            var element = await _context.TipoContratos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
+            element.Abreviatura = elementDTO.Abreviatura;
             element.Descripcion = elementDTO.Descripcion;
-            element.ImporteHoraBase = elementDTO.ImporteHoraBase;
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
@@ -145,10 +147,10 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar esta 'Categoría', esta asignada a otros registros");
+                return Forbid("No se puede eliminar este 'Tipo de Contrato', esta asignado a otros registros");
             }
 
-            var element = await _context.Categorias.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.TipoContratos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -170,6 +172,5 @@ namespace LexERP.Server.Controllers
 
             return true;
         }
-
     }
 }

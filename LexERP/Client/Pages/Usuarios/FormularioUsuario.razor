@@ -200,7 +200,7 @@ else
 
     private async Task CargarDepartamentos()
     {
-        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>("api/departamentos/lista");
+        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>($"api/departamentos/lista/{Usuario.Departamento.Id}");
 
         if (httpResponse.Error)
         {
@@ -214,7 +214,7 @@ else
 
     private async Task CargarCategorias()
     {
-        var httpResponse = await repositorio.Get<List<CategoriaDTOmin>>("api/categorias/lista");
+        var httpResponse = await repositorio.Get<List<CategoriaDTOmin>>($"api/categorias/lista/{Usuario.Categoria.Id}");
 
         if (httpResponse.Error)
         {

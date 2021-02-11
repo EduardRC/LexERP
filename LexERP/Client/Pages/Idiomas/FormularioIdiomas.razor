@@ -1,7 +1,7 @@
 ﻿@inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 
-@if (!inicializado)
+@if (Item == null)
 {
     <Cargando />
 }
@@ -19,7 +19,7 @@ else
                             <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
                             <ValidationMessage For="@(() => Item.Activo)" />
                         </div>
-                        &nbsp; <label>Área activa</label>
+                        &nbsp; <label>Idioma activo</label>
                     </div>
                 }
 
@@ -37,17 +37,6 @@ else
                         <ValidationMessage For="@(() => Item.Descripcion)" />
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Departamento:</label>
-                    <div>
-                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Departamento.Id">
-                            @foreach (var departamento in departamentos)
-                            {
-                                <option value="@departamento.Id">@departamento.Descripcion</option>
-                            }
-                        </select>
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -56,32 +45,7 @@ else
 }
 
 @code {
-    [Parameter] public AreaDTO Item { get; set; }
+    [Parameter] public IdiomaDTO Item { get; set; }
     [Parameter] public Boolean ModoEdicion { get; set; } = false;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
-
-    private bool inicializado = false;
-
-    private List<DepartamentoDTOmin> departamentos;
-
-    protected async override Task OnInitializedAsync()
-    {
-        await CargarDepartamentos();
-
-        inicializado = true;
-    }
-
-    private async Task CargarDepartamentos()
-    {
-        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>($"api/departamentos/lista/{Item.Departamento.Id}");
-
-        if (httpResponse.Error)
-        {
-            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
-        }
-        else
-        {
-            departamentos = httpResponse.Response;
-        }
-    }
 }

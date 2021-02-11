@@ -23,16 +23,11 @@
     <Folder Include="Pages\Expedientes\" />
     <Folder Include="Pages\Facturas\" />
     <Folder Include="Pages\FormasDePago\" />
-    <Folder Include="Pages\Idiomas\" />
-    <Folder Include="Pages\TipoContactos\" />
-    <Folder Include="Pages\TipoExpedientes\" />
-    <Folder Include="Pages\TipoContratos\" />
-    <Folder Include="Pages\TipoActuaciones\" />
+    <Folder Include="Pages\TiposActuacion\" />
+    <Folder Include="Pages\TiposContacto\" />
+    <Folder Include="Pages\TiposExpediente\" />
     <Folder Include="Pages\Tarifas\" />
-    <Folder Include="Pages\Sectores\" />
-    <Folder Include="Pages\Servicios\" />
     <Folder Include="Pages\Proveedores\" />
-    <Folder Include="Pages\Paises\" />
   </ItemGroup>
 
 </Project>

@@ -19,31 +19,24 @@ else
                             <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
                             <ValidationMessage For="@(() => Item.Activo)" />
                         </div>
-                        &nbsp; <label>Área activa</label>
+                        &nbsp; <label>Idioma activo</label>
                     </div>
                 }
 
                 <div class="form-group">
-                    <label>Abreviatura:</label>
+                    <label>Nombre:</label>
                     <div>
-                        <InputText class="form-control" @bind-Value="@Item.Abreviatura" />
-                        <ValidationMessage For="@(() => Item.Abreviatura)" />
+                        <InputText class="form-control" @bind-Value="@Item.Nombre" />
+                        <ValidationMessage For="@(() => Item.Nombre)" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Descripcion:</label>
+                    <label>Idioma:</label>
                     <div>
-                        <InputText class="form-control" @bind-Value="@Item.Descripcion" />
-                        <ValidationMessage For="@(() => Item.Descripcion)" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Departamento:</label>
-                    <div>
-                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Departamento.Id">
-                            @foreach (var departamento in departamentos)
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Idioma.Id">
+                            @foreach (var idioma in idiomas)
                             {
-                                <option value="@departamento.Id">@departamento.Descripcion</option>
+                                <option value="@idioma.Id">@idioma.Descripcion</option>
                             }
                         </select>
                     </div>
@@ -56,24 +49,24 @@ else
 }
 
 @code {
-    [Parameter] public AreaDTO Item { get; set; }
+    [Parameter] public PaisDTO Item { get; set; }
     [Parameter] public Boolean ModoEdicion { get; set; } = false;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
 
     private bool inicializado = false;
 
-    private List<DepartamentoDTOmin> departamentos;
+    private List<IdiomaDTO> idiomas;
 
     protected async override Task OnInitializedAsync()
     {
-        await CargarDepartamentos();
+        await CargarIdiomas();
 
         inicializado = true;
     }
 
-    private async Task CargarDepartamentos()
+    private async Task CargarIdiomas()
     {
-        var httpResponse = await repositorio.Get<List<DepartamentoDTOmin>>($"api/departamentos/lista/{Item.Departamento.Id}");
+        var httpResponse = await repositorio.Get<List<IdiomaDTO>>($"api/idiomas/lista/{Item.Idioma.Id}");
 
         if (httpResponse.Error)
         {
@@ -81,7 +74,7 @@ else
         }
         else
         {
-            departamentos = httpResponse.Response;
+            idiomas = httpResponse.Response;
         }
     }
 }

@@ -144,12 +144,31 @@ namespace LexERP.Server.Controllers
             }
         }
 
+        [HttpGet("lista")]
+        [HttpGet("lista/{id}")]
+        public async Task<ActionResult<List<UsuarioDTOlist>>> Lista(int id=0)
+        {
+            return await _context.Users
+                .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.FullName)
+                .Select(x => new UsuarioDTOlist
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName
+                }).ToListAsync();
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
             // al querer eliminiar el usuario, lo que haremos sera deshabilitarlo,
             // para no perder los enlaces que hay asignados a el,
             // borramos tambien el email y username para evitar problemas si en el futuro se vuelve a crear con mismo email
+
+            if (!await CanDelete(id))
+            {
+                return Forbid("No se puede eliminar este 'Usuario', esta asignado a otros registros");
+            }
 
             var usuario = await _context.Users.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
@@ -326,5 +345,15 @@ namespace LexERP.Server.Controllers
             await _userManager.RemoveFromRoleAsync(usuario, editarRolDTO.RoleNombre);
             return NoContent();
         }
+
+        [HttpGet("CanDelete/{id}")]
+        public async Task<bool> CanDelete(int id)
+        {
+            // Mirar si se puede eliminar el registro
+            // para bloquear si hay dependencias existentes
+
+            return true;
+        }
+
     }
 }

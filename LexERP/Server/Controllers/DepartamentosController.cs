@@ -96,12 +96,13 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpGet("lista")]
-        public async Task<ActionResult<List<DepartamentoDTOmin>>> Get()
+        [HttpGet("lista/{id}")]
+        public async Task<ActionResult<List<DepartamentoDTOmin>>> Lista(int id=0)
         {
             return await _context.Departamentos
-                .Where(x=>x.Eliminado==false && x.Activo==true)
-                .OrderBy(x => x.Orden)
-                .Select(x=> new DepartamentoDTOmin
+                .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Descripcion)
+                .Select(x => new DepartamentoDTOmin
                 {
                     Id = x.Id,
                     Abreviatura = x.Abreviatura,
@@ -154,6 +155,11 @@ namespace LexERP.Server.Controllers
             // al querer eliminiar el registro, lo que haremos sera deshabilitarlo,
             // para no perder los enlaces que hay asignados a el,
 
+            if (!await CanDelete(id))
+            {
+                return Forbid("No se puede eliminar este 'Departamento', esta asignada a otros registros");
+            }
+
             var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
@@ -166,6 +172,15 @@ namespace LexERP.Server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("CanDelete{id}")]
+        public async Task<bool> CanDelete(int id)
+        {
+            // Mirar si se puede eliminar el registro
+            // para bloquear si hay dependencias existentes
+
+            return true;
         }
 
     }

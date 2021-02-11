@@ -1,0 +1,28 @@
+﻿@page "/servicios/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Servicio</h3>
+
+<FormularioServicios Item="item"
+                   OnValidSubmit="Crear" />
+
+@code {
+    private ServicioDTO item = new ServicioDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/servicios", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/servicios");
+        }
+    }
+}

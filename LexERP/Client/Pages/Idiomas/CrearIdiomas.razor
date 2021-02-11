@@ -1,0 +1,29 @@
+﻿@page "/idiomas/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Idioma</h3>
+
+<FormularioIdiomas Item="item"
+                         OnValidSubmit="Crear" />
+
+@code {
+    private IdiomaDTO item = new IdiomaDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/idiomas", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/idiomas");
+        }
+    }
+}
+
