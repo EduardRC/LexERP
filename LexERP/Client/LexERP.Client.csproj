@@ -22,11 +22,7 @@
     <Folder Include="Pages\Contactos\" />
     <Folder Include="Pages\Expedientes\" />
     <Folder Include="Pages\Facturas\" />
-    <Folder Include="Pages\FormasDePago\" />
-    <Folder Include="Pages\TiposActuacion\" />
-    <Folder Include="Pages\TiposContacto\" />
     <Folder Include="Pages\TiposExpediente\" />
-    <Folder Include="Pages\Tarifas\" />
     <Folder Include="Pages\Proveedores\" />
   </ItemGroup>
 

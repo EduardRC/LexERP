@@ -1,42 +1,45 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IdentityModel;
+using LexERP.Server.Data;
+using LexERP.Server.Helpers;
+using LexERP.Server.Models;
+using LexERP.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LexERP.Server.Data;
-using LexERP.Server.Helpers;
-using LexERP.Server.Models;
-using LexERP.Shared.DTOs;
-using IdentityModel;
 
 namespace LexERP.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class DepartamentosController : ControllerBase
+    public class TarifasController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public DepartamentosController(ApplicationDbContext context)
+        public TarifasController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<DepartamentoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
+        public async Task<ActionResult<List<TarifaDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Departamentos.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.Tarifas.Where(x => x.Eliminado == false)
+                .Include(x => x.Empresa)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
                 var searchString = parametrosBusqueda.Buscar.ToLower();
 
                 queryable = queryable
-                    .Where(x => x.Descripcion.ToLower().Contains(searchString) ||
-                                x.Abreviatura.ToLower().Contains(searchString));
+                    .Where(x => x.Empresa.RazonSocial.ToLower().Contains(searchString) ||
+                                x.Abreviatura.ToLower().Contains(searchString) ||
+                                x.Descripcion.ToLower().Contains(searchString));
             }
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
@@ -46,17 +49,17 @@ namespace LexERP.Server.Controllers
                     case "descripcion_desc":
                         queryable = queryable.OrderByDescending(s => s.Descripcion);
                         break;
+                    case "empresa":
+                        queryable = queryable.OrderBy(s => s.Empresa.RazonSocial);
+                        break;
+                    case "empresa_desc":
+                        queryable = queryable.OrderByDescending(s => s.Empresa.RazonSocial);
+                        break;
                     case "abreviatura":
                         queryable = queryable.OrderBy(s => s.Abreviatura);
                         break;
                     case "abreviatura_desc":
                         queryable = queryable.OrderByDescending(s => s.Abreviatura);
-                        break;
-                    case "orden":
-                        queryable = queryable.OrderBy(s => s.Orden);
-                        break;
-                    case "orden_desc":
-                        queryable = queryable.OrderByDescending(s => s.Orden);
                         break;
                     default:
                         queryable = queryable.OrderBy(s => s.Descripcion);
@@ -67,58 +70,64 @@ namespace LexERP.Server.Controllers
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
 
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
-                .Select(x => new DepartamentoDTO
+                .Select(x => new TarifaDTO
                 {
                     Id = x.Id,
                     Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion,
-                    Orden = x.Orden,
+                    Predeterminada = x.Predeterminada,
+                    Empresa = new EmpresaDTO { RazonSocial = x.Empresa.RazonSocial },
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DepartamentoDTO>> Get(int id)
+        public async Task<ActionResult<TarifaDTO>> Get(int id)
         {
-            var element = await _context.Departamentos.Where(x => x.Id == id && x.Eliminado==false)
+            var element = await _context.Tarifas.Where(x => x.Id == id && x.Eliminado == false)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new DepartamentoDTO
-            { 
+            return new TarifaDTO
+            {
                 Id = element.Id,
                 Abreviatura = element.Abreviatura,
+                Empresa = new EmpresaDTO { Id = element.EmpresaId },
                 Descripcion = element.Descripcion,
-                Orden = element.Orden,
+                Observaciones = element.Observaciones,
+                Fecha = element.Fecha,
+                Predeterminada = element.Predeterminada,
                 Activo = element.Activo
             };
         }
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<DepartamentoDTOmin>>> Lista(int id=0)
+        public async Task<ActionResult<List<TarifaDTO>>> Lista(int id = 0)
         {
-            return await _context.Departamentos
+            return await _context.Tarifas
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
                 .OrderBy(x => x.Descripcion)
-                .Select(x => new DepartamentoDTOmin
+                .Select(x => new TarifaDTO
                 {
                     Id = x.Id,
-                    Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion,
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(DepartamentoDTO elementDTO)
+        public async Task<ActionResult<int>> Post(TarifaDTO elementDTO)
         {
-            var element = new Departamento
+            var element = new Tarifa
             {
                 Abreviatura = elementDTO.Abreviatura,
+                EmpresaId = elementDTO.Empresa.Id,
                 Descripcion = elementDTO.Descripcion,
-                Orden = elementDTO.Orden,
+                Observaciones = elementDTO.Observaciones,
+                Fecha = elementDTO.Fecha,
+                Predeterminada = elementDTO.Predeterminada,
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
@@ -131,15 +140,18 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(DepartamentoDTO elementDTO)
+        public async Task<ActionResult> Put(TarifaDTO elementDTO)
         {
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado==false);
+            var element = await _context.Tarifas.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
             element.Abreviatura = elementDTO.Abreviatura;
+            element.EmpresaId = elementDTO.Empresa.Id;
             element.Descripcion = elementDTO.Descripcion;
-            element.Orden = elementDTO.Orden;
+            element.Observaciones = elementDTO.Observaciones;
+            element.Fecha = elementDTO.Fecha;
+            element.Predeterminada = elementDTO.Predeterminada;
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
@@ -158,10 +170,10 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar este 'Departamento', esta asignada a otros registros");
+                return Forbid("No se puede eliminar esta 'Tarifa', esta asignada a otros registros");
             }
 
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.Tarifas.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -175,7 +187,7 @@ namespace LexERP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet("CanDelete{id}")]
+        [HttpGet("CanDelete/{id}")]
         public async Task<bool> CanDelete(int id)
         {
             // Mirar si se puede eliminar el registro

@@ -16,7 +16,7 @@ namespace LexERP.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class EmpresasController: ControllerBase
+    public class EmpresasController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
@@ -95,7 +95,7 @@ namespace LexERP.Server.Controllers
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<EmpresaDTOlist>>> Lista(int id=0)
+        public async Task<ActionResult<List<EmpresaDTOlist>>> Lista(int id = 0)
         {
             return await _context.Empresas
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
@@ -103,7 +103,8 @@ namespace LexERP.Server.Controllers
                 .Select(x => new EmpresaDTOlist
                 {
                     Id = x.Id,
-                    RazonSocial = x.RazonSocial
+                    RazonSocial = x.RazonSocial,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 
@@ -167,7 +168,7 @@ namespace LexERP.Server.Controllers
                 return Forbid("No se puede eliminar esta 'Empresa', esta asignada a otros registros");
             }
 
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.Empresas.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -192,3 +193,5 @@ namespace LexERP.Server.Controllers
 
     }
 }
+
+

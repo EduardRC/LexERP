@@ -1,21 +1,17 @@
 ﻿using LexERP.Shared.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LexERP.Server.Models
+namespace LexERP.Shared.DTOs
 {
-    public class TipoContacto : _comun
+    public class TipoContactoDTO
     {
-        // trabajo, movil, casa, email particular, email trabajo, linkedin, facebook
-
         public int Id { get; set; }
         public ClaseTipoContacto Clase { get; set; }
-
-        [StringLength(50)]
         public string Descripcion { get; set; }
+        public bool Activo { get; set; }
     }
 }

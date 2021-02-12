@@ -1,0 +1,216 @@
+﻿@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject IMostrarMensajes mostrarMensajes
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12 col-lg-8 col-xl-6">
+
+                @if (ModoEdicion)
+                {
+                    <div class="form-inline">
+                        <div>
+                            <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                            <ValidationMessage For="@(() => Item.Activo)" />
+                        </div>
+                        &nbsp; <label>Forma de pago activa</label>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label>Empresa:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Empresa.Id">
+                            @foreach (var empresa in empresas)
+                            {
+                                <option value="@empresa.Id">@empresa.RazonSocial</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Abreviatura:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Abreviatura" />
+                        <ValidationMessage For="@(() => Item.Abreviatura)" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripcion:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Descripcion" />
+                        <ValidationMessage For="@(() => Item.Descripcion)" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-12 col-lg-4 col-xl-6">
+
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Item.Predeterminada" />
+                        <ValidationMessage For="@(() => Item.Predeterminada)" />
+                    </div>
+                    &nbsp; <label>Tarifa predeterminada</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Observaciones:</label>
+                    <div>
+                        <InputTextArea rows="8" class="form-control" @bind-Value="@Item.Observaciones" />
+                        <ValidationMessage For="@(() => Item.Observaciones)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-12 col-lg-2">
+                <h4>Detalle</h4>
+                <button class="btn btn-primary" @onclick="@(()=>CrearDetalle())">+</button>
+            </div>
+            <div class="col-sm-12 col-lg-10">
+                <ListadoGenerico Listado="detalle">
+                    <NoHayRegistros>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fecha inicio</th>
+                                    <th>Categoría</th>
+                                    <th>Usuario</th>
+                                    <th>Precio hora</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <br />
+                        <text>No hay registros para mostrar</text>
+                    </NoHayRegistros>
+                    <HayRegistrosCompleto>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fecha inicio</th>
+                                    <th>Categoría</th>
+                                    <th>Usuario</th>
+                                    <th>Precio hora</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in detalle)
+                                    {
+                                    <tr @onclick="@(()=>EditarDetalle(item.Id))" style="cursor:pointer;">
+                                        <td>@item.Fecha.ToShortDateString()</td>
+                                        <td>@item.Categoria.Descripcion</td>
+                                        <td>@item.Usuario.FullName</td>
+                                        <td>@item.ImporteHora.ToString("#,##0.00")</td>
+                                    </tr>
+                                    }
+                            </tbody>
+                        </table>
+                    </HayRegistrosCompleto>
+                </ListadoGenerico>
+            </div>
+        </div>
+        <hr />
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public TarifaDTO Item { get; set; }
+    [Parameter] public Boolean ModoEdicion { get; set; } = false;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private bool inicializado = false;
+
+    private List<EmpresaDTOlist> empresas;
+    private List<TarifaDetalleDTO> detalle;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await CargarEmpresas();
+        detalle = Item.Detalle.OrderBy(x => x.Categoria.Descripcion)
+                                  .ThenBy(x => x.Usuario.FullName)
+                                  .ThenBy(x => x.Fecha)
+                                  .ToList();
+        inicializado = true;
+    }
+
+    private async Task CargarEmpresas()
+    {
+        var httpResponse = await repositorio.Get<List<EmpresaDTOlist>>("api/empresas/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            empresas = httpResponse.Response;
+        }
+    }
+
+    public async Task EditarDetalle(int id)
+    {
+        var detalle = Item.Detalle.Single(x => x.Id == id);
+
+        var detalleUpdate = await ModalShow(detalle);
+
+        //if (detalleUpdate != null)
+        //{
+        //    Item.Detalle.Remove(detalle);
+        //}
+        //else
+        //{
+        //    detalle.Activo = detalleUpdate.Activo;
+        //    detalle.Categoria = detalleUpdate.Categoria;
+        //    detalle.ImporteHora = detalleUpdate.ImporteHora;
+        //    detalle.Fecha = detalleUpdate.Fecha;
+        //}
+    }
+
+    private async Task CrearDetalle()
+    {
+        var detalle = await ModalShow(new TarifaDetalleDTO { Categoria = new CategoriaDTO(), Usuario=new UsuarioDTO() });
+
+        //if (detalle!=null)
+        //{
+        //    Item.Detalle.Add(detalle);
+        //}
+    }
+
+    private async Task<TarifaDetalleDTO> ModalShow(TarifaDetalleDTO detalle)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(DetalleTarifa.Item), detalle);
+
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var detalleModal = Modal.Show<DetalleTarifa>("",parameters, options);
+        var result = await detalleModal.Result;
+
+        if (!result.Cancelled)
+        {
+            return (TarifaDetalleDTO)result.Data;
+        }
+
+        return null;
+    }
+
+}

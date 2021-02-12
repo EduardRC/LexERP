@@ -154,7 +154,8 @@ namespace LexERP.Server.Controllers
                 .Select(x => new UsuarioDTOlist
                 {
                     Id = x.Id,
-                    Nombre = x.FullName
+                    Nombre = x.FullName,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 

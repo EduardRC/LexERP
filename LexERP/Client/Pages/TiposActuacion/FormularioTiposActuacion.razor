@@ -19,10 +19,17 @@ else
                             <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
                             <ValidationMessage For="@(() => Item.Activo)" />
                         </div>
-                        &nbsp; <label>Categoría activa</label>
+                        &nbsp; <label>Tipo actuación activa</label>
                     </div>
                 }
 
+                <div class="form-group">
+                    <label>Abreviatura:</label>
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Abreviatura" />
+                        <ValidationMessage For="@(() => Item.Abreviatura)" />
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Descripcion:</label>
                     <div>
@@ -31,10 +38,10 @@ else
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Precio Hora:</label>
+                    <label>Texto Actuación:</label>
                     <div>
-                        <InputNumber class="form-control" @bind-Value="@Item.ImporteHoraBase" />
-                        <ValidationMessage For="@(() => Item.ImporteHoraBase)" />
+                        <InputTextArea rows="10" class="form-control" @bind-Value="@Item.TextoActuacion" />
+                        <ValidationMessage For="@(() => Item.TextoActuacion)" />
                     </div>
                 </div>
             </div>
@@ -45,7 +52,7 @@ else
 }
 
 @code {
-    [Parameter] public CategoriaDTO Item { get; set; }
+    [Parameter] public TipoActuacionDTO Item { get; set; }
     [Parameter] public Boolean ModoEdicion { get; set; } = false;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
 }

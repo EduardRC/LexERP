@@ -1,0 +1,29 @@
+﻿@page "/formasdepago/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Forma de Pago</h3>
+
+<FormularioFormasDePago Item="item"
+                        OnValidSubmit="Crear" />
+
+@code {
+    private FormaDePagoDTO item = new FormaDePagoDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/formasdepago", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/formasdepago");
+        }
+    }
+}
+

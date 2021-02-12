@@ -1,42 +1,41 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IdentityModel;
+using LexERP.Server.Data;
+using LexERP.Server.Helpers;
+using LexERP.Server.Models;
+using LexERP.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LexERP.Server.Data;
-using LexERP.Server.Helpers;
-using LexERP.Server.Models;
-using LexERP.Shared.DTOs;
-using IdentityModel;
 
 namespace LexERP.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class DepartamentosController : ControllerBase
+    public class TiposContactoController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public DepartamentosController(ApplicationDbContext context)
+        public TiposContactoController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<DepartamentoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
+        public async Task<ActionResult<List<TipoContactoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Departamentos.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.TipoContactos.Where(x => x.Eliminado == false).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
                 var searchString = parametrosBusqueda.Buscar.ToLower();
 
                 queryable = queryable
-                    .Where(x => x.Descripcion.ToLower().Contains(searchString) ||
-                                x.Abreviatura.ToLower().Contains(searchString));
+                    .Where(x => x.Descripcion.ToLower().Contains(searchString));
             }
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Orden))
@@ -46,17 +45,11 @@ namespace LexERP.Server.Controllers
                     case "descripcion_desc":
                         queryable = queryable.OrderByDescending(s => s.Descripcion);
                         break;
-                    case "abreviatura":
-                        queryable = queryable.OrderBy(s => s.Abreviatura);
+                    case "clase":
+                        queryable = queryable.OrderBy(s => s.Clase);
                         break;
-                    case "abreviatura_desc":
-                        queryable = queryable.OrderByDescending(s => s.Abreviatura);
-                        break;
-                    case "orden":
-                        queryable = queryable.OrderBy(s => s.Orden);
-                        break;
-                    case "orden_desc":
-                        queryable = queryable.OrderByDescending(s => s.Orden);
+                    case "clase_desc":
+                        queryable = queryable.OrderByDescending(s => s.Clase);
                         break;
                     default:
                         queryable = queryable.OrderBy(s => s.Descripcion);
@@ -67,58 +60,54 @@ namespace LexERP.Server.Controllers
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
 
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
-                .Select(x => new DepartamentoDTO
+                .Select(x => new TipoContactoDTO
                 {
                     Id = x.Id,
-                    Abreviatura = x.Abreviatura,
+                    Clase = x.Clase,
                     Descripcion = x.Descripcion,
-                    Orden = x.Orden,
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DepartamentoDTO>> Get(int id)
+        public async Task<ActionResult<TipoContactoDTO>> Get(int id)
         {
-            var element = await _context.Departamentos.Where(x => x.Id == id && x.Eliminado==false)
+            var element = await _context.TipoContactos.Where(x => x.Id == id && x.Eliminado == false)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new DepartamentoDTO
-            { 
+            return new TipoContactoDTO
+            {
                 Id = element.Id,
-                Abreviatura = element.Abreviatura,
+                Clase = element.Clase,
                 Descripcion = element.Descripcion,
-                Orden = element.Orden,
                 Activo = element.Activo
             };
         }
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<DepartamentoDTOmin>>> Lista(int id=0)
+        public async Task<ActionResult<List<TipoContactoDTO>>> Lista(int id = 0)
         {
-            return await _context.Departamentos
+            return await _context.TipoContactos
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
                 .OrderBy(x => x.Descripcion)
-                .Select(x => new DepartamentoDTOmin
+                .Select(x => new TipoContactoDTO
                 {
                     Id = x.Id,
-                    Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion,
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(DepartamentoDTO elementDTO)
+        public async Task<ActionResult<int>> Post(TipoContactoDTO elementDTO)
         {
-            var element = new Departamento
+            var element = new TipoContacto
             {
-                Abreviatura = elementDTO.Abreviatura,
+                Clase = elementDTO.Clase,
                 Descripcion = elementDTO.Descripcion,
-                Orden = elementDTO.Orden,
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
@@ -131,15 +120,14 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(DepartamentoDTO elementDTO)
+        public async Task<ActionResult> Put(TipoContactoDTO elementDTO)
         {
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado==false);
+            var element = await _context.TipoContactos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
-            element.Abreviatura = elementDTO.Abreviatura;
+            element.Clase = elementDTO.Clase;
             element.Descripcion = elementDTO.Descripcion;
-            element.Orden = elementDTO.Orden;
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
@@ -158,10 +146,10 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar este 'Departamento', esta asignada a otros registros");
+                return Forbid("No se puede eliminar este 'tipo de contacto', esta asignado a otros registros");
             }
 
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.TipoContactos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -175,7 +163,7 @@ namespace LexERP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet("CanDelete{id}")]
+        [HttpGet("CanDelete/{id}")]
         public async Task<bool> CanDelete(int id)
         {
             // Mirar si se puede eliminar el registro
@@ -183,6 +171,6 @@ namespace LexERP.Server.Controllers
 
             return true;
         }
-
     }
 }
+

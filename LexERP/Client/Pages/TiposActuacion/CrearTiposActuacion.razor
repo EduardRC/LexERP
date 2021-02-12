@@ -1,0 +1,28 @@
+﻿@page "/tiposactuacion/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Tipo Actuación</h3>
+
+<FormularioTiposActuacion Item="item"
+                        OnValidSubmit="Crear" />
+
+@code {
+    private TipoActuacionDTO item = new TipoActuacionDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/tiposactuacion", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/tiposactuacion");
+        }
+    }
+}

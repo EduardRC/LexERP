@@ -1,0 +1,29 @@
+﻿@page "/tarifas/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Tarifa</h3>
+
+<FormularioTarifas Item="item"
+                        OnValidSubmit="Crear" />
+
+@code {
+    private TarifaDTO item = new TarifaDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/tarifas", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/tarifas");
+        }
+    }
+}
+

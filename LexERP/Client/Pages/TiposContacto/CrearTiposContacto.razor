@@ -1,0 +1,28 @@
+﻿@page "/tiposcontacto/crear"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h3>Crear Tipo Contrato</h3>
+
+<FormularioTiposContacto Item="item"
+                         OnValidSubmit="Crear" />
+
+@code {
+    private TipoContactoDTO item = new TipoContactoDTO();
+
+    private async Task Crear()
+    {
+        var httpResponse = await repositorio.Post("api/tiposcontacto", item);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("/tiposcontacto");
+        }
+    }
+}

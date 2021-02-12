@@ -88,7 +88,8 @@ namespace LexERP.Server.Controllers
                 .Select(x => new SectorDTO
                 {
                     Id = x.Id,
-                    Descripcion = x.Descripcion
+                    Descripcion = x.Descripcion,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 

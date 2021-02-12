@@ -1,0 +1,124 @@
+﻿@page "/tiposactuacion"
+@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+@attribute [Authorize]
+
+<IndiceGenerico @ref="child"
+                Listado="listado"
+                SortOrder="@sortOrder"
+                RefListado="tiposactuacion"
+                UrlNuevo="/tiposactuacion/crear"
+                TituloListado="Listado de Tipos de Actuación"
+                PaginasTotales="paginasTotales"
+                Busqueda="RealizarBusqueda">
+    <NoHayRegistros>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Abrv.</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+        </table>
+        <br />
+        <text>No hay registros para mostrar</text>
+    </NoHayRegistros>
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("abreviatura"))" style="cursor:pointer">
+                            Abrv.
+                            @if (sortOrder == "abreviatura_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "abreviatura")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                    <th class="text-corporativo">
+                        <a @onclick="@(()=>NuevoOrdenamiento("descripcion"))" style="cursor:pointer">
+                            Descripción
+                            @if (sortOrder == "descripcion_desc")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 5L8 10.481 12.796 5H3.204zm-.753.659l4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
+                                </svg>
+                            }
+                            else if (sortOrder == "descripcion")
+                            {
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z" />
+                                </svg>
+                            }
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in listado)
+                {
+                    <tr @onclick="@(()=>EditarRegistro(item.Id))" style="cursor:pointer;">
+                        <td>@item.Abreviatura</td>
+                        <td>@item.Descripcion</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</IndiceGenerico>
+
+@code {
+
+    IndiceGenerico<TipoActuacionDTO> child;
+
+    public List<TipoActuacionDTO> listado { get; set; }
+
+    public int paginasTotales { get; set; }
+    string sortOrder = "descripcion";
+
+    public async Task RealizarBusqueda(string queryStrings)
+    {
+        var httpResponse = await repositorio.Get<List<TipoActuacionDTO>>($"api/tiposactuacion?" + queryStrings);
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
+            listado = httpResponse.Response;
+        }
+    }
+
+    private async Task NuevoOrdenamiento(string campo)
+    {
+        switch (campo)
+        {
+            case "abreviatura":
+                sortOrder = "abreviatura" + ((sortOrder == "abreviatura") ? "_desc" : "");
+                break;
+            case "descripcion":
+                sortOrder = "descripcion" + ((sortOrder == "descripcion") ? "_desc" : "");
+                break;
+        }
+
+        await child.NuevoOrdenamiento(sortOrder);
+    }
+
+    private async Task EditarRegistro(int id)
+    {
+        await child.EditarRegistro($"tiposactuacion/editar/{id}");
+    }
+
+
+}

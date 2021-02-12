@@ -98,7 +98,8 @@ namespace LexERP.Server.Controllers
                 {
                     Id = x.Id,
                     Abreviatura = x.Abreviatura,
-                    Descripcion = x.Descripcion
+                    Descripcion = x.Descripcion,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 

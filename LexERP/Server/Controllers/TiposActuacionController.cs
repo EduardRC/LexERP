@@ -16,19 +16,19 @@ namespace LexERP.Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class DepartamentosController : ControllerBase
+    public class TiposActuacionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public DepartamentosController(ApplicationDbContext context)
+        public TiposActuacionController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<DepartamentoDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
+        public async Task<ActionResult<List<TipoActuacionDTO>>> Get([FromQuery] ParametrosBusquedaSeleccion parametrosBusqueda)
         {
-            var queryable = _context.Departamentos.Where(x => x.Eliminado == false).AsQueryable();
+            var queryable = _context.TipoActuaciones.Where(x => x.Eliminado == false).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(parametrosBusqueda.Buscar))
             {
@@ -52,12 +52,6 @@ namespace LexERP.Server.Controllers
                     case "abreviatura_desc":
                         queryable = queryable.OrderByDescending(s => s.Abreviatura);
                         break;
-                    case "orden":
-                        queryable = queryable.OrderBy(s => s.Orden);
-                        break;
-                    case "orden_desc":
-                        queryable = queryable.OrderByDescending(s => s.Orden);
-                        break;
                     default:
                         queryable = queryable.OrderBy(s => s.Descripcion);
                         break;
@@ -67,42 +61,41 @@ namespace LexERP.Server.Controllers
             await HttpContext.InsertarParametrosPaginacionEnRespuesta(queryable, parametrosBusqueda.Paginacion.CantidadRegistros);
 
             return await queryable.Paginar(parametrosBusqueda.Paginacion)
-                .Select(x => new DepartamentoDTO
+                .Select(x => new TipoActuacionDTO
                 {
                     Id = x.Id,
                     Abreviatura = x.Abreviatura,
                     Descripcion = x.Descripcion,
-                    Orden = x.Orden,
                     Activo = x.Activo
                 }).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DepartamentoDTO>> Get(int id)
+        public async Task<ActionResult<TipoActuacionDTO>> Get(int id)
         {
-            var element = await _context.Departamentos.Where(x => x.Id == id && x.Eliminado==false)
+            var element = await _context.TipoActuaciones.Where(x => x.Id == id && x.Eliminado == false)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new DepartamentoDTO
-            { 
+            return new TipoActuacionDTO
+            {
                 Id = element.Id,
                 Abreviatura = element.Abreviatura,
                 Descripcion = element.Descripcion,
-                Orden = element.Orden,
+                TextoActuacion = element.TextoActuacion,
                 Activo = element.Activo
             };
         }
 
         [HttpGet("lista")]
         [HttpGet("lista/{id}")]
-        public async Task<ActionResult<List<DepartamentoDTOmin>>> Lista(int id=0)
+        public async Task<ActionResult<List<TipoActuacionDTO>>> Lista(int id = 0)
         {
-            return await _context.Departamentos
+            return await _context.TipoActuaciones
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
                 .OrderBy(x => x.Descripcion)
-                .Select(x => new DepartamentoDTOmin
+                .Select(x => new TipoActuacionDTO
                 {
                     Id = x.Id,
                     Abreviatura = x.Abreviatura,
@@ -112,13 +105,13 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Post(DepartamentoDTO elementDTO)
+        public async Task<ActionResult<int>> Post(TipoActuacionDTO elementDTO)
         {
-            var element = new Departamento
+            var element = new TipoActuacion
             {
                 Abreviatura = elementDTO.Abreviatura,
                 Descripcion = elementDTO.Descripcion,
-                Orden = elementDTO.Orden,
+                TextoActuacion = elementDTO.TextoActuacion,
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
@@ -131,15 +124,15 @@ namespace LexERP.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> Put(DepartamentoDTO elementDTO)
+        public async Task<ActionResult> Put(TipoActuacionDTO elementDTO)
         {
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado==false);
+            var element = await _context.TipoActuaciones.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
             element.Abreviatura = elementDTO.Abreviatura;
             element.Descripcion = elementDTO.Descripcion;
-            element.Orden = elementDTO.Orden;
+            element.TextoActuacion = elementDTO.TextoActuacion;
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
@@ -158,10 +151,10 @@ namespace LexERP.Server.Controllers
 
             if (!await CanDelete(id))
             {
-                return Forbid("No se puede eliminar este 'Departamento', esta asignada a otros registros");
+                return Forbid("No se puede eliminar este 'Tipo de Actuación', esta asignado a otros registros");
             }
 
-            var element = await _context.Departamentos.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
+            var element = await _context.TipoActuaciones.FirstOrDefaultAsync(x => x.Id == id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -186,3 +179,4 @@ namespace LexERP.Server.Controllers
 
     }
 }
+

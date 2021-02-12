@@ -19,22 +19,26 @@ else
                             <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
                             <ValidationMessage For="@(() => Item.Activo)" />
                         </div>
-                        &nbsp; <label>Categoría activa</label>
+                        &nbsp; <label>Tipo Contrato activo</label>
                     </div>
                 }
 
+                <div class="form-group">
+                    <label>Clase:</label>
+                    <div>
+                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Clase">
+                            @foreach (var clase in Enum.GetValues(typeof(ClaseTipoContacto)))
+                            {
+                                <option value="@clase">@clase</option>
+                            }
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Descripcion:</label>
                     <div>
                         <InputText class="form-control" @bind-Value="@Item.Descripcion" />
                         <ValidationMessage For="@(() => Item.Descripcion)" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Precio Hora:</label>
-                    <div>
-                        <InputNumber class="form-control" @bind-Value="@Item.ImporteHoraBase" />
-                        <ValidationMessage For="@(() => Item.ImporteHoraBase)" />
                     </div>
                 </div>
             </div>
@@ -45,7 +49,7 @@ else
 }
 
 @code {
-    [Parameter] public CategoriaDTO Item { get; set; }
+    [Parameter] public TipoContactoDTO Item { get; set; }
     [Parameter] public Boolean ModoEdicion { get; set; } = false;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
 }

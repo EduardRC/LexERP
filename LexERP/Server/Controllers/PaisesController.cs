@@ -100,7 +100,8 @@ namespace LexERP.Server.Controllers
                 .Select(x => new PaisDTO
                 {
                     Id = x.Id,
-                    Nombre = x.Nombre
+                    Nombre = x.Nombre,
+                    Activo = x.Activo
                 }).ToListAsync();
         }
 
