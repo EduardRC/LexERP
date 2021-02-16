@@ -150,7 +150,7 @@ namespace LexERP.Server.Controllers
         {
             return await _context.Users
                 .Where(x => x.Eliminado == false && (x.Activo == true || x.Id == id))
-                .OrderBy(x => x.FullName)
+                .OrderBy(x=>x.Apellidos).ThenBy(x=>x.Nombre)
                 .Select(x => new UsuarioDTOlist
                 {
                     Id = x.Id,

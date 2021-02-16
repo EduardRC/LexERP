@@ -85,11 +85,13 @@ namespace LexERP.Server.Controllers
         public async Task<ActionResult<TarifaDTO>> Get(int id)
         {
             var element = await _context.Tarifas.Where(x => x.Id == id && x.Eliminado == false)
+                .Include(x => x.Detalle).ThenInclude(x => x.Categoria)
+                .Include(x => x.Detalle).ThenInclude(x => x.Usuario)
                 .FirstOrDefaultAsync();
 
             if (element == null) { return NotFound(); }
 
-            return new TarifaDTO
+            var tarifa = new TarifaDTO
             {
                 Id = element.Id,
                 Abreviatura = element.Abreviatura,
@@ -98,8 +100,46 @@ namespace LexERP.Server.Controllers
                 Observaciones = element.Observaciones,
                 Fecha = element.Fecha,
                 Predeterminada = element.Predeterminada,
-                Activo = element.Activo
+                Activo = element.Activo,
+                Detalle = new List<TarifaDetalleDTO>()
             };
+
+            foreach (var item in element.Detalle.Where(x=>x.Eliminado==false))
+            {
+                var detalle = new TarifaDetalleDTO
+                {
+                    Id = item.Id,
+                    ImporteHora = item.ImporteHora,
+                    Fecha = item.Fecha,
+                    Categoria = new CategoriaDTOmin(),
+                    Usuario = new UsuarioDTOmin(),
+                    Activo = item.Activo
+                };
+
+                if (item.CategoriaId != null)
+                {
+                    if (!item.Categoria.Eliminado)
+                    {
+                        detalle.Categoria.Id = item.CategoriaId ?? default(int);
+                        detalle.Categoria.Descripcion = item.Categoria.Descripcion;
+                        detalle.Categoria.Activo = item.Categoria.Activo;
+                    }
+                }
+
+                if (item.UsuarioId != null)
+                {
+                    if (!item.Usuario.Eliminado)
+                    {
+                        detalle.Usuario.Id = item.UsuarioId ?? default(int);
+                        detalle.Usuario.Nombre = item.Usuario.FullName;
+                        detalle.Usuario.Activo = item.Usuario.Activo;
+                    }
+                }
+
+                tarifa.Detalle.Add(detalle);
+            }
+
+            return tarifa;
         }
 
         [HttpGet("lista")]
@@ -128,12 +168,40 @@ namespace LexERP.Server.Controllers
                 Observaciones = elementDTO.Observaciones,
                 Fecha = elementDTO.Fecha,
                 Predeterminada = elementDTO.Predeterminada,
+                Detalle = new List<TarifaDetalle>(),
                 Activo = true,
                 CreadoFecha = DateTime.Now,
                 CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
             };
 
-            _context.Add(element);
+            foreach (var item in elementDTO.Detalle)
+            {
+                //var detalle = new TarifaDetalle
+                //{
+                //    TarifaId = element.Id,
+                //    ImporteHora = item.ImporteHora,
+                //    Fecha = item.Fecha,
+                //    Activo = true,
+                //    CreadoFecha = DateTime.Now,
+                //    CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
+                //};
+
+                //if (item.Categoria.Id != 0)
+                //{
+                //    detalle.CategoriaId = item.Categoria.Id;
+                //}
+
+                //if (item.Usuario.Id != 0)
+                //{
+                //    detalle.UsuarioId = item.Usuario.Id;
+                //}
+
+                //element.Detalle.Add(detalle);
+
+                element.Detalle.Add(NuevoDetalle(item));
+            }
+
+            _context.Tarifas.Add(element);
             await _context.SaveChangesAsync();
 
             return element.Id;
@@ -142,7 +210,7 @@ namespace LexERP.Server.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(TarifaDTO elementDTO)
         {
-            var element = await _context.Tarifas.FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
+            var element = await _context.Tarifas.Include(x=>x.Detalle).FirstOrDefaultAsync(x => x.Id == elementDTO.Id && x.Eliminado == false);
 
             if (element == null) { return NotFound(); }
 
@@ -155,6 +223,61 @@ namespace LexERP.Server.Controllers
             element.Activo = elementDTO.Activo;
             element.ModificadoFecha = DateTime.Now;
             element.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
+
+            // Detalle, 
+            // 1.- eliminar los que no esten
+            var idsDetalle = elementDTO.Detalle.Select(x => x.Id).ToList();
+            foreach (var item in element.Detalle.Where(x => !idsDetalle.Contains(x.Id)))
+            {
+                //aqui estan los detalles que ahora ya no estan (se han eliminado en la edición)
+                item.ModificadoFecha = DateTime.Now;
+                item.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
+                item.Eliminado = true;
+            }
+
+            // 2.- añadir los nuevos (Id==0)
+            foreach (var item in elementDTO.Detalle.Where(x=>x.Id==0))
+            {
+                element.Detalle.Add(NuevoDetalle(item,element.Id));
+            }
+
+            // 3.- actualizar el resto si es necesario
+            foreach (var item in elementDTO.Detalle.Where(x => x.Id != 0))
+            {
+                var detalleActualizar = element.Detalle.FirstOrDefault(x => x.Id == item.Id);
+
+                // si varia Activo, actualizar, si cambia fecha, categoria, usuario o precio,
+                // eliminar (marca) y crear nueva, asi se tendra un historial por si se tiene
+                // que recuperar analizar algo
+
+                var modificadaCategoria = (detalleActualizar.CategoriaId == null && item.Categoria.Id != 0) ||
+                                          (detalleActualizar.CategoriaId != null && item.Categoria.Id != detalleActualizar.CategoriaId);
+
+                var modificadoUsuario = (detalleActualizar.UsuarioId == null && item.Usuario.Id != 0) ||
+                                          (detalleActualizar.UsuarioId != null && item.Usuario.Id != detalleActualizar.UsuarioId);
+
+                if (item.ImporteHora != detalleActualizar.ImporteHora ||
+                    item.Fecha != detalleActualizar.Fecha ||
+                    modificadaCategoria ||
+                    modificadoUsuario)
+                {
+                    // eliminar el actual y crear una nuevo
+                    detalleActualizar.ModificadoFecha = DateTime.Now;
+                    detalleActualizar.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
+                    detalleActualizar.Eliminado = true;
+
+                    element.Detalle.Add(NuevoDetalle(item, element.Id));
+                }
+                else
+                {
+                    if (item.Activo != detalleActualizar.Activo)
+                    {
+                        detalleActualizar.Activo = item.Activo;
+                        detalleActualizar.ModificadoFecha = DateTime.Now;
+                        detalleActualizar.ModificadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value);
+                    }
+                }
+            }
 
             _context.Attach(element).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -194,6 +317,31 @@ namespace LexERP.Server.Controllers
             // para bloquear si hay dependencias existentes
 
             return true;
+        }
+
+        private TarifaDetalle NuevoDetalle(TarifaDetalleDTO detalleDTO, int id=0, bool activo=true)
+        {
+            var detalle = new TarifaDetalle
+            {
+                TarifaId = id,
+                ImporteHora = detalleDTO.ImporteHora,
+                Fecha = detalleDTO.Fecha,
+                Activo = activo,
+                CreadoFecha = DateTime.Now,
+                CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
+            };
+
+            if (detalleDTO.Categoria.Id != 0)
+            {
+                detalle.CategoriaId = detalleDTO.Categoria.Id;
+            }
+
+            if (detalleDTO.Usuario.Id != 0)
+            {
+                detalle.UsuarioId = detalleDTO.Usuario.Id;
+            }
+
+            return detalle;
         }
 
     }

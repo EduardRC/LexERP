@@ -11,7 +11,7 @@ namespace LexERP.Shared.DTOs
         public TarifaDTO()
         {
             Empresa = new EmpresaDTO();
-            Detalle = new HashSet<TarifaDetalleDTO>();
+            Detalle = new List<TarifaDetalleDTO>();
         }
 
         public int Id { get; set; }
@@ -23,14 +23,14 @@ namespace LexERP.Shared.DTOs
         public bool Predeterminada { get; set; }
         public bool Activo { get; set; }
 
-        public ICollection<TarifaDetalleDTO> Detalle { get; set; }
+        public List<TarifaDetalleDTO> Detalle { get; set; }
     }
 
     public class TarifaDetalleDTO
     {
         public int Id { get; set; }
-        public CategoriaDTO Categoria { get; set; }
-        public UsuarioDTO Usuario { get; set; }
+        public CategoriaDTOmin Categoria { get; set; }
+        public UsuarioDTOmin Usuario { get; set; }
         public decimal ImporteHora { get; set; }
         public DateTime Fecha { get; set; }
         public bool Activo { get; set; }

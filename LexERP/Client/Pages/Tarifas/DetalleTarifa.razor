@@ -6,63 +6,54 @@ else
 {
     <EditForm Model="Item">
         <DataAnnotationsValidator />
+        <dl class="dl-horizontal">
 
-        <div class="row">
-            <div class="col-sm-12 col-lg-8 col-xl-6">
+            @if (Item.Id != 0)
+            {
+                <dt>Activo</dt>
+                <dd>
+                    <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                    <ValidationMessage For="@(() => Item.Activo)" />
+                </dd>
+            }
 
-                @if (Item.Id != 0)
-                {
-                    <div class="form-inline">
-                        <div>
-                            <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
-                            <ValidationMessage For="@(() => Item.Activo)" />
-                        </div>
-                        &nbsp; <label>Forma de pago activa</label>
-                    </div>
-                }
+            @if (seleccionCategoria)
+            {
+                <dt>Categoría: <button class="btn btn-link" @onclick="@(()=>seleccionCategoria=false)">Cambiar a usuario</button></dt>
+                <dd>
+                    <select class="form-control mb-2 mr-sm-2" @bind="@Item.Categoria.Id">
+                        @foreach (var categoria in Categorias.OrderBy(x => x.Descripcion))
+                        {
+                            <option value="@categoria.Id">@categoria.Descripcion</option>
+                        }
+                    </select>
+                </dd>
+            }
+            else
+            {
+                <dt>Usuario: <button class="btn btn-link" @onclick="@(()=>seleccionCategoria=true)">Cambiar a categoría</button></dt>
+                <dd>
+                    <select class="form-control mb-2 mr-sm-2" @bind="@Item.Usuario.Id">
+                        @foreach (var usuario in Usuarios.OrderBy(x => x.Nombre))
+                        {
+                            <option value="@usuario.Id">@usuario.Nombre</option>
+                        }
+                    </select>
+                </dd>
+            }
 
+            <dt>Precio Hora:</dt>
+            <dd>
+                <InputNumber class="form-control" @bind-Value="@Item.ImporteHora" />
+                <ValidationMessage For="@(() => Item.ImporteHora)" />
+            </dd>
 
-                <div class="form-group">
-                    <label>Categoría:</label>
-                    <div>
-                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Categoria.Id">
-                            @foreach (var categoria in Categorias)
-                            {
-                                <option value="@categoria.Id">@categoria.Descripcion</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Usuario:</label>
-                    <div>
-                        <select class="form-control mb-2 mr-sm-2" @bind="@Item.Usuario.Id">
-                            @foreach (var usuario in Usuarios)
-                            {
-                                <option value="@usuario.Id">@usuario.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Precio Hora:</label>
-                    <div>
-                        <InputNumber class="form-control" @bind-Value="@Item.ImporteHora" />
-                        <ValidationMessage For="@(() => Item.ImporteHora)" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Fecha inicio:</label>
-                    <div>
-                        <InputDate class="form-control" @bind-Value="@Item.Fecha" />
-                        <ValidationMessage For="@(() => Item.Fecha)" />
-                    </div>
-                </div>
-
-            </div>
-        </div>
+            <dt>Fecha inicio:</dt>
+            <dd>
+                <InputDate class="form-control" @bind-Value="@Item.Fecha" />
+                <ValidationMessage For="@(() => Item.Fecha)" />
+            </dd>
+        </dl>
 
     </EditForm>
     <hr />
@@ -74,20 +65,32 @@ else
 @code {
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
     [Parameter] public TarifaDetalleDTO Item { get; set; }
+    [Parameter] public List<CategoriaDTO> Categorias { get; set; }
+    [Parameter] public List<UsuarioDTOlist> Usuarios { get; set; }
 
-    [Parameter] public IEnumerable<CategoriaDTO> Categorias { get; set; }
-    [Parameter] public IEnumerable<UsuarioDTOlist> Usuarios { get; set; }
-
+    private bool seleccionCategoria;
 
     protected override void OnInitialized()
     {
-        Item.Id = 10;
-        Item.ImporteHora = 150;
-        Item.Fecha = DateTime.Today;
+        seleccionCategoria = Item.Usuario.Id == 0;
     }
 
-    async Task Aceptar() => await BlazoredModal.CloseAsync(ModalResult.Ok(Item));
+    async Task Aceptar()
+    {
+        if (seleccionCategoria)
+        {
+            Item.Usuario.Id = 0;
+        }
+        else
+        {
+            Item.Categoria.Id = 0;
+        }
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
     async Task Cancelar() => await BlazoredModal.CancelAsync();
+
 
 }

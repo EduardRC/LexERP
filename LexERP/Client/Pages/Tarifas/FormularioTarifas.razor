@@ -8,7 +8,8 @@
 }
 else
 {
-    <EditForm Model="Item" OnValidSubmit="OnValidSubmit">
+    <EditForm Model="Item">
+        @*OnValidSubmit="OnValidSubmit"*@
         <DataAnnotationsValidator />
         <div class="row">
             <div class="col-sm-12 col-lg-8 col-xl-6">
@@ -20,7 +21,7 @@ else
                             <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
                             <ValidationMessage For="@(() => Item.Activo)" />
                         </div>
-                        &nbsp; <label>Forma de pago activa</label>
+                        &nbsp; <label>Tarífa activa</label>
                     </div>
                 }
 
@@ -77,9 +78,11 @@ else
             <div class="col-sm-12 col-lg-2">
                 <h4>Detalle</h4>
                 <button class="btn btn-primary" @onclick="@(()=>CrearDetalle())">+</button>
+                @*<button class="btn btn-primary" @onclick="@(()=>EliminarRegistro(1))">+</button>*@
+
             </div>
             <div class="col-sm-12 col-lg-10">
-                <ListadoGenerico Listado="detalle">
+                <ListadoGenerico Listado="detalles">
                     <NoHayRegistros>
                         <table class="table table-striped">
                             <thead>
@@ -102,16 +105,20 @@ else
                                     <th>Categoría</th>
                                     <th>Usuario</th>
                                     <th>Precio hora</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in detalle)
+                                @foreach (var detalle in detalles.OrderBy(x => x.Categoria.Descripcion)
+                                  .ThenBy(x => x.Usuario.Nombre)
+                                  .ThenBy(x => x.Fecha))
                                     {
-                                    <tr @onclick="@(()=>EditarDetalle(item.Id))" style="cursor:pointer;">
-                                        <td>@item.Fecha.ToShortDateString()</td>
-                                        <td>@item.Categoria.Descripcion</td>
-                                        <td>@item.Usuario.FullName</td>
-                                        <td>@item.ImporteHora.ToString("#,##0.00")</td>
+                                    <tr @onclick="@(()=>EditarDetalle(detalle))" style="cursor:pointer;">
+                                        <td>@detalle.Fecha.ToShortDateString()</td>
+                                        <td>@detalle.Categoria.Descripcion</td>
+                                        <td>@detalle.Usuario.Nombre</td>
+                                        <td>@detalle.ImporteHora.ToString("#,##0.00")</td>
+                                        <td><a @onclick="@(()=>detalles.Remove(detalle))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                                     </tr>
                                     }
                             </tbody>
@@ -121,7 +128,8 @@ else
             </div>
         </div>
         <hr />
-        <button class="btn btn-primary" type="submit">Guardar</button>
+        @*<button class="btn btn-primary" type="submit">Guardar</button>*@
+        <button class="btn btn-primary" @onclick="@Guardar">Guardar</button>
     </EditForm>
 }
 
@@ -135,15 +143,19 @@ else
     private bool inicializado = false;
 
     private List<EmpresaDTOlist> empresas;
-    private List<TarifaDetalleDTO> detalle;
+    private List<TarifaDetalleDTO> detalles;
+    private List<CategoriaDTO> categorias;
+    private List<UsuarioDTOlist> usuarios;
 
     protected async override Task OnInitializedAsync()
     {
         await CargarEmpresas();
-        detalle = Item.Detalle.OrderBy(x => x.Categoria.Descripcion)
-                                  .ThenBy(x => x.Usuario.FullName)
-                                  .ThenBy(x => x.Fecha)
-                                  .ToList();
+
+        detalles = Item.Detalle.ToList();
+
+        await CargarCategorias();
+        await CargarUsuarios();
+
         inicializado = true;
     }
 
@@ -161,39 +173,118 @@ else
         }
     }
 
-    public async Task EditarDetalle(int id)
+    private async Task CargarCategorias()
     {
-        var detalle = Item.Detalle.Single(x => x.Id == id);
+        var httpResponse = await repositorio.Get<List<CategoriaDTO>>("api/categorias/lista");
 
-        var detalleUpdate = await ModalShow(detalle);
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            categorias = httpResponse.Response;
+        }
+    }
 
-        //if (detalleUpdate != null)
-        //{
-        //    Item.Detalle.Remove(detalle);
-        //}
-        //else
-        //{
-        //    detalle.Activo = detalleUpdate.Activo;
-        //    detalle.Categoria = detalleUpdate.Categoria;
-        //    detalle.ImporteHora = detalleUpdate.ImporteHora;
-        //    detalle.Fecha = detalleUpdate.Fecha;
-        //}
+    private async Task CargarUsuarios()
+    {
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>("api/usuarios/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            usuarios = httpResponse.Response;
+        }
+    }
+
+    public async Task EditarDetalle(TarifaDetalleDTO detalle)
+    {
+        var detalleUpdate = new TarifaDetalleDTO
+        {
+            Id = detalle.Id,
+            Categoria = new CategoriaDTOmin { Id = detalle.Categoria.Id },
+            Usuario = new UsuarioDTOmin { Id = detalle.Usuario.Id },
+            Activo = detalle.Activo,
+            ImporteHora = detalle.ImporteHora,
+            Fecha = detalle.Fecha
+        };
+
+        if (await ModalShow(detalleUpdate))
+        {
+            if (detalleUpdate.Categoria.Id==0)
+            {
+                detalle.Categoria.Id = 0;
+                detalle.Categoria.Descripcion = "";
+            }
+            else
+            {
+                if (detalleUpdate.Categoria.Id != detalle.Categoria.Id)
+                {
+                    detalle.Categoria.Id = detalleUpdate.Categoria.Id;
+                    detalle.Categoria.Descripcion = BuscarDescripcionCategoria(detalleUpdate.Categoria.Id);
+                    //                    detalle.Categoria.Descripcion = categorias.Find(x => x.Id == detalleUpdate.Categoria.Id).Descripcion;
+                }
+            }
+
+            if (detalleUpdate.Usuario.Id==0)
+            {
+                detalle.Usuario.Id = 0;
+                detalle.Usuario.Nombre = "";
+            }
+            else
+            {
+                if (detalleUpdate.Usuario.Id != detalle.Usuario.Id)
+                {
+                    detalle.Usuario.Id = detalleUpdate.Usuario.Id;
+                    detalle.Usuario.Nombre = BuscarNombreUsuario(detalleUpdate.Usuario.Id);
+//                    detalle.Usuario.Nombre = usuarios.Find(x => x.Id == detalleUpdate.Usuario.Id).Nombre;
+                }
+            }
+
+            detalle.Activo = detalleUpdate.Activo;
+            detalle.ImporteHora = detalleUpdate.ImporteHora;
+            detalle.Fecha = detalleUpdate.Fecha;
+        }
     }
 
     private async Task CrearDetalle()
     {
-        var detalle = await ModalShow(new TarifaDetalleDTO { Categoria = new CategoriaDTO(), Usuario=new UsuarioDTO() });
+        var nuevoDetalle = new TarifaDetalleDTO
+        {
+            Fecha = DateTime.Today,
+            Categoria = new CategoriaDTOmin(),
+            Usuario = new UsuarioDTOmin()
+        };
 
-        //if (detalle!=null)
-        //{
-        //    Item.Detalle.Add(detalle);
-        //}
+        if (await ModalShow(nuevoDetalle))
+        {
+            //if (nuevoDetalle.Categoria.Id != 0)
+            //{
+            //    nuevoDetalle.Categoria.Descripcion = categorias.Find(x => x.Id == nuevoDetalle.Categoria.Id).Descripcion;
+            //}
+
+            //if (nuevoDetalle.Usuario.Id != 0)
+            //{
+            //    nuevoDetalle.Usuario.Nombre = usuarios.Find(x => x.Id == nuevoDetalle.Usuario.Id).Nombre;
+            //}
+
+            nuevoDetalle.Categoria.Descripcion = BuscarDescripcionCategoria(nuevoDetalle.Categoria.Id);
+            nuevoDetalle.Usuario.Nombre = BuscarNombreUsuario(nuevoDetalle.Usuario.Id);
+
+            detalles.Add(nuevoDetalle);
+        }
     }
 
-    private async Task<TarifaDetalleDTO> ModalShow(TarifaDetalleDTO detalle)
+    private async Task<bool> ModalShow(TarifaDetalleDTO detalle)
     {
         var parameters = new ModalParameters();
         parameters.Add(nameof(DetalleTarifa.Item), detalle);
+        parameters.Add(nameof(DetalleTarifa.Categorias), categorias);
+        parameters.Add(nameof(DetalleTarifa.Usuarios), usuarios);
 
         var options = new ModalOptions()
         {
@@ -202,15 +293,39 @@ else
             HideHeader = true
         };
 
-        var detalleModal = Modal.Show<DetalleTarifa>("",parameters, options);
+        var detalleModal = Modal.Show<DetalleTarifa>("", parameters, options);
         var result = await detalleModal.Result;
 
-        if (!result.Cancelled)
+        return !result.Cancelled;
+    }
+
+    private async Task Guardar()
+    {
+        Item.Detalle.Clear();
+        Item.Detalle.AddRange(detalles);
+
+
+        await OnValidSubmit.InvokeAsync();
+    }
+
+    private string BuscarDescripcionCategoria(int id)
+    {
+        if (id!=0)
         {
-            return (TarifaDetalleDTO)result.Data;
+            return categorias.Find(x => x.Id == id)?.Descripcion;
         }
 
-        return null;
+        return "";
+    }
+
+    private string BuscarNombreUsuario(int id)
+    {
+        if (id != 0)
+        {
+            return usuarios.Find(x => x.Id == id)?.Nombre;
+        }
+
+        return "";
     }
 
 }

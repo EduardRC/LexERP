@@ -26,7 +26,7 @@ namespace LexERP.Server.Models
         public bool Predeterminada { get; set; }
 
         public virtual Empresa Empresa { get; set; }
-        public virtual IEnumerable<TarifaDetalle> Detalle { get; set; }
+        public virtual List<TarifaDetalle> Detalle { get; set; }
 
     }
 }

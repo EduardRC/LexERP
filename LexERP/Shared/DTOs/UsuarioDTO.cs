@@ -56,4 +56,11 @@ namespace LexERP.Shared.DTOs
         public string Categoria { get; set; }
         public bool Activo { get; set; }
     }
+
+    public class UsuarioDTOmin
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public bool Activo { get; set; }
+    }
 }
