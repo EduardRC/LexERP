@@ -176,28 +176,6 @@ namespace LexERP.Server.Controllers
 
             foreach (var item in elementDTO.Detalle)
             {
-                //var detalle = new TarifaDetalle
-                //{
-                //    TarifaId = element.Id,
-                //    ImporteHora = item.ImporteHora,
-                //    Fecha = item.Fecha,
-                //    Activo = true,
-                //    CreadoFecha = DateTime.Now,
-                //    CreadoPor = int.Parse(User.FindFirst(JwtClaimTypes.Id).Value)
-                //};
-
-                //if (item.Categoria.Id != 0)
-                //{
-                //    detalle.CategoriaId = item.Categoria.Id;
-                //}
-
-                //if (item.Usuario.Id != 0)
-                //{
-                //    detalle.UsuarioId = item.Usuario.Id;
-                //}
-
-                //element.Detalle.Add(detalle);
-
                 element.Detalle.Add(NuevoDetalle(item));
             }
 

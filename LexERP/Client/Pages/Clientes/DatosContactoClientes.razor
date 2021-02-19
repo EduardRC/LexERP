@@ -1,0 +1,68 @@
+﻿@if (Listado == null)
+{
+    <Cargando />
+}
+else
+{
+    <hr />
+    <h5>
+        <span class="oi oi-list" aria-hidden="true"></span>
+        Datos contacto
+        &nbsp; <button class="btn btn-primary" @onclick="@(() => AddItem())"><span class="oi oi-plus" aria-hidden="true"></span></button>
+    </h5>
+
+    <ListadoGenerico Listado="Listado">
+        <NoHayRegistros>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+            </table>
+            <br />
+            <text>No hay registros para mostrar</text>
+        </NoHayRegistros>
+        <HayRegistros>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Valor</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Listado.OrderBy(x => x.TipoContacto.Clase))
+                        {
+                        <tr @onclick="@(() => EditarDetalle(item))" style="cursor:pointer;">
+                            <td>@item.TipoContacto.Descripcion</td>
+                            <td>@item.Valor</td>
+                            <td><a @onclick="@(() => Eliminar(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                        </tr>
+                        }
+                </tbody>
+            </table>
+        </HayRegistros>
+    </ListadoGenerico>
+}
+
+@code {
+    [Parameter] public List<DatoContactoDTO> Listado { get; set; }
+
+    private void AddItem()
+    {
+
+    }
+
+    private void Eliminar(DatoContactoDTO item)
+    {
+
+    }
+
+    private void EditarDetalle(DatoContactoDTO item)
+    {
+
+    }
+}

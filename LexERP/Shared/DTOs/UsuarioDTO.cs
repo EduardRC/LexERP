@@ -10,9 +10,13 @@ namespace LexERP.Shared.DTOs
     public class UsuarioDTO
     {
         public int Id { get; set; }
+        [StringLength(5)]
         public string Iniciales { get; set; }
+        [StringLength(80)]
         public string Nombre { get; set; }
+        [StringLength(80)]
         public string Apellidos { get; set; }
+        [StringLength(50)]
         public string Email { get; set; }
         public string Password { get; set; }
 

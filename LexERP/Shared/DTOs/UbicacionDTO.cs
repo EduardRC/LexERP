@@ -7,18 +7,9 @@ using System.Threading.Tasks;
 
 namespace LexERP.Shared.DTOs
 {
-    public class EmpresaDTO
+    public class UbicacionDTO
     {
         public int Id { get; set; }
-
-        [StringLength(5)]
-        public string Abreviatura { get; set; }
-
-        [StringLength(80)]
-        public string RazonSocial { get; set; }
-
-        [StringLength(15)]
-        public string NIF { get; set; }
 
         [StringLength(80)]
         public string Direccion { get; set; }
@@ -32,17 +23,13 @@ namespace LexERP.Shared.DTOs
         [StringLength(80)]
         public string Provincia { get; set; }
 
-        public string Observaciones { get; set; }
-        public bool Activo { get; set; }
-    }
+        public PaisDTO Pais { get; set; }
 
-    public class EmpresaDTOlist
-    {
-        public int Id { get; set; }
-        [StringLength(5)]
-        public string Abreviatura { get; set; }
-        [StringLength(80)]
-        public string RazonSocial { get; set; }
+        [StringLength(50)]
+        public string Descripcion { get; set; }
+
+        public string Observaciones { get; set; }
+
         public bool Activo { get; set; }
     }
 }

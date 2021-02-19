@@ -1,0 +1,117 @@
+﻿@if (Principal == null || Listado == null)
+{
+    <Cargando />
+}
+else
+{
+    <hr />
+    <div class="row">
+        <div class="col-sm-12 col-md-6">
+            <h5>
+                <span class="oi oi-location" aria-hidden="true"></span>
+                Dirección principal
+            </h5>
+            <div class="form-group">
+                <div>
+                    <InputText class="form-control" @bind-Value="@Principal.Direccion" placeholder="Dirección" />
+                    <ValidationMessage For="@(() => Principal.Direccion)" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <InputText class="form-control" @bind-Value="@Principal.Poblacion" placeholder="Población" />
+                    <ValidationMessage For="@(() => Principal.Poblacion)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Principal.CodigoPostal" placeholder="Codigo Postal" />
+                            <ValidationMessage For="@(() => Principal.CodigoPostal)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    <div class="form-group">
+                        <div>
+                            <InputText class="form-control" @bind-Value="@Principal.Provincia" placeholder="Provincia" />
+                            <ValidationMessage For="@(() => Principal.Provincia)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <InputTextArea rows="3" class="form-control" @bind-Value="@Principal.Observaciones" placeholder="Observaciones" />
+                    <ValidationMessage For="@(() => Principal.Observaciones)" />
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <h5>
+                Direcciones Alternativas
+                &nbsp; <button class="btn btn-primary" @onclick="@(()=>AddItem())"><span class="oi oi-plus" aria-hidden="true"></span></button>
+            </h5>
+            <ListadoGenerico Listado="Listado">
+                <NoHayRegistros>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Población</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <br />
+                    <text>No hay registros para mostrar</text>
+                </NoHayRegistros>
+                <HayRegistros>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Población</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Listado)
+                                {
+                                <tr @onclick="@(()=>EditarDetalle(item))" style="cursor:pointer;">
+                                    <td>@item.Descripcion</td>
+                                    <td>@item.Poblacion</td>
+                                    <td><a @onclick="@(()=>ConvetirEnPrincipal(item))" @onclick:stopPropagation="true"><span class="oi oi-star" aria-hidden="true"></span></a></td>
+                                </tr>
+                                }
+                        </tbody>
+                    </table>
+
+                </HayRegistros>
+            </ListadoGenerico>
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter] public UbicacionDTO Principal { get; set; }
+    [Parameter] public List<UbicacionDTO> Listado { get; set; }
+
+    private async Task AddItem()
+    {
+
+    }
+
+    private void EditarDetalle(UbicacionDTO ubicacion)
+    {
+
+    }
+
+    private void ConvetirEnPrincipal(UbicacionDTO ubicacion)
+    {
+
+    }
+}

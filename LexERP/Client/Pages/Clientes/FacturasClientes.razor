@@ -1,0 +1,26 @@
+﻿<h4>Facturas</h4>
+
+@if (Listado == null)
+{
+    <Cargando />
+}
+else
+{
+    <ListadoGenerico Listado="Listado">
+        <NoHayRegistros>
+
+        </NoHayRegistros>
+        <HayRegistros>
+
+        </HayRegistros>
+    </ListadoGenerico>
+}
+
+@code {
+    [Parameter] public List<ClienteDTOmin> Listado { get; set; }
+
+    private async Task AddItem()
+    {
+
+    }
+}

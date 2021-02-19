@@ -77,9 +77,7 @@ else
         <div class="row">
             <div class="col-sm-12 col-lg-2">
                 <h4>Detalle</h4>
-                <button class="btn btn-primary" @onclick="@(()=>CrearDetalle())">+</button>
-                @*<button class="btn btn-primary" @onclick="@(()=>EliminarRegistro(1))">+</button>*@
-
+                <button class="btn btn-primary" @onclick="@(()=>CrearDetalle())"><span class="oi oi-plus" aria-hidden="true"></span></button>
             </div>
             <div class="col-sm-12 col-lg-10">
                 <ListadoGenerico Listado="detalles">
@@ -129,7 +127,7 @@ else
         </div>
         <hr />
         @*<button class="btn btn-primary" type="submit">Guardar</button>*@
-        <button class="btn btn-primary" @onclick="@Guardar">Guardar</button>
+        <button class="btn btn-primary" @onclick="@Guardar"><span class="oi oi-hard-drive" aria-hidden="true"></span> Guardar</button>
     </EditForm>
 }
 
@@ -226,7 +224,6 @@ else
                 {
                     detalle.Categoria.Id = detalleUpdate.Categoria.Id;
                     detalle.Categoria.Descripcion = BuscarDescripcionCategoria(detalleUpdate.Categoria.Id);
-                    //                    detalle.Categoria.Descripcion = categorias.Find(x => x.Id == detalleUpdate.Categoria.Id).Descripcion;
                 }
             }
 
@@ -241,7 +238,6 @@ else
                 {
                     detalle.Usuario.Id = detalleUpdate.Usuario.Id;
                     detalle.Usuario.Nombre = BuscarNombreUsuario(detalleUpdate.Usuario.Id);
-//                    detalle.Usuario.Nombre = usuarios.Find(x => x.Id == detalleUpdate.Usuario.Id).Nombre;
                 }
             }
 
@@ -262,16 +258,6 @@ else
 
         if (await ModalShow(nuevoDetalle))
         {
-            //if (nuevoDetalle.Categoria.Id != 0)
-            //{
-            //    nuevoDetalle.Categoria.Descripcion = categorias.Find(x => x.Id == nuevoDetalle.Categoria.Id).Descripcion;
-            //}
-
-            //if (nuevoDetalle.Usuario.Id != 0)
-            //{
-            //    nuevoDetalle.Usuario.Nombre = usuarios.Find(x => x.Id == nuevoDetalle.Usuario.Id).Nombre;
-            //}
-
             nuevoDetalle.Categoria.Descripcion = BuscarDescripcionCategoria(nuevoDetalle.Categoria.Id);
             nuevoDetalle.Usuario.Nombre = BuscarNombreUsuario(nuevoDetalle.Usuario.Id);
 
@@ -303,7 +289,6 @@ else
     {
         Item.Detalle.Clear();
         Item.Detalle.AddRange(detalles);
-
 
         await OnValidSubmit.InvokeAsync();
     }

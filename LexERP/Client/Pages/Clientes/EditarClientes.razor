@@ -1,4 +1,4 @@
-﻿@page "/tarifas/editar/{Id:int}"
+﻿@page "/clientes/editar/{Id}"
 @inject IRepositorio repositorio
 @inject IMostrarMensajes mostrarMensajes
 @inject NavigationManager navigationManager
@@ -11,29 +11,28 @@
 }
 else
 {
-    <h3>Editar @item.Descripcion</h3>
+    <h3>Editar @item.Persona.FullName</h3>
     <div>
-        <button @onclick="@(()=>EliminarRegistro(item.Id))" class="btn btn-primary"><span class="oi oi-trash" aria-hidden="true"></span> Borrar tarifa</button>
+        <button @onclick="@(()=>EliminarRegistro(item.IdPublico))" class="btn btn-primary"><span class="oi oi-trash" aria-hidden="true"></span> Borrar cliente</button>
         <br />
         <br />
     </div>
 
-    <FormularioTarifas Item="item"
-                            ModoEdicion="true"
-                            OnValidSubmit="Guardar" />
+    <FormularioClientes Item="item"
+                       OnValidSubmit="Guardar" />
 }
 
 
 @code {
     [CascadingParameter] public IModalService Modal { get; set; }
 
-    [Parameter] public int Id { get; set; }
+    [Parameter] public Guid Id { get; set; }
 
-    private TarifaDTO item;
+    private ClienteDTO item;
 
     protected override async Task OnInitializedAsync()
     {
-        var httpResponse = await repositorio.Get<TarifaDTO>($"api/tarifas/{Id}");
+        var httpResponse = await repositorio.Get<ClienteDTO>($"api/clientes/{Id}");
 
         if (httpResponse.Error)
         {
@@ -47,7 +46,7 @@ else
 
     private async Task Guardar()
     {
-        var httpResponse = await repositorio.Put("api/tarifas", item);
+        var httpResponse = await repositorio.Put("api/clientes", item);
 
         if (httpResponse.Error)
         {
@@ -55,14 +54,14 @@ else
         }
         else
         {
-            navigationManager.NavigateTo("/tarifas");
+            navigationManager.NavigateTo("/clientes");
         }
     }
 
-    private async Task EliminarRegistro(int id)
+    private async Task EliminarRegistro(Guid id)
     {
         var parameters = new ModalParameters();
-        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar la tarifa {item.Descripcion.ToUpper()}?");
+        parameters.Add(nameof(ConfirmarEliminacion.Texto), $"¿Está seguro de que quiere eliminar el cliente {item.Persona.FullName.ToUpper()}?");
 
         var options = new ModalOptions()
         {
@@ -76,7 +75,7 @@ else
 
         if (!result.Cancelled)
         {
-            var httpResponse = await repositorio.Delete($"api/tarifas/{id}");
+            var httpResponse = await repositorio.Delete($"api/clientes/{id}");
 
             if (httpResponse.Error)
             {
@@ -84,7 +83,7 @@ else
             }
             else
             {
-                navigationManager.NavigateTo("/tarifas");
+                navigationManager.NavigateTo("/clientes");
             }
         }
     }

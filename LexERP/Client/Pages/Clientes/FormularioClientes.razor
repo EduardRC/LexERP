@@ -1,0 +1,399 @@
+﻿@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+@inject IMostrarMensajes mostrarMensajes
+
+@if (!inicializado)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12 col-lg-8 col-xl-6">
+
+                <div class="row">
+                    @if (Item.Id != 0)
+                    {
+                        <div class="col-sm-6">
+                            <div class="form-inline">
+                                <div>
+                                    <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                                    <ValidationMessage For="@(() => Item.Activo)" />
+                                </div>
+                                &nbsp; <label>Cliente activo</label>
+                            </div>
+
+                        </div>
+                    }
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <div>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.EmpresaId">
+                                    @foreach (var empresa in empresas)
+                                    {
+                                        <option value="@empresa.Id">@empresa.RazonSocial</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.Persona.Tipo">
+                                    @foreach (var clase in Enum.GetValues(typeof(TipoPersona)))
+                                    {
+                                        <option value="@clase">Persona @clase</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control"
+                                           @bind-Value="@Item.Persona.Documento"
+                                           placeholder=@((Item.Persona.Tipo == TipoPersona.Física)?"NIF":"CIF") />
+                                <ValidationMessage For="@(() => Item.Persona.Documento)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.Abreviatura" placeholder="Abreviatura" />
+                                <ValidationMessage For="@(() => Item.Abreviatura)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Item.Persona.Tipo == TipoPersona.Física)
+                {
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <div>
+                                    <InputText class="form-control" @bind-Value="@Item.Persona.Saludo" placeholder="Saludo" />
+                                    <ValidationMessage For="@(() => Item.Persona.Saludo)" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="form-group">
+                                <div>
+                                    <InputText class="form-control" @bind-Value="@Item.Persona.Nombre" placeholder="Nombre" />
+                                    <ValidationMessage For="@(() => Item.Persona.Nombre)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Persona.Apellidos"
+                                   placeholder=@((Item.Persona.Tipo == TipoPersona.Física)?"Apellidos":"Razón social") />
+                        <ValidationMessage For="@(() => Item.Persona.Apellidos)" />
+                    </div>
+                </div>
+
+                @if (Item.Persona.Tipo == TipoPersona.Física)
+                {
+                    <div class="form-group">
+                        <label>Fecha nacimiento:</label>
+                        <div>
+                            <InputDate class="form-control" @bind-Value="@Item.Persona.FechaNacimiento" />
+                            <ValidationMessage For="@(() => Item.Persona.FechaNacimiento)" />
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.NombreComercial" placeholder="Nombre comercial" />
+                        <ValidationMessage For="@(() => Item.NombreComercial)" />
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="col-sm-12 col-lg-4 col-xl-6">
+                <div class="form-group">
+                    <label>Observaciones:</label>
+                    <div>
+                        <InputTextArea rows="8" class="form-control" @bind-Value="@Item.Persona.Observaciones" />
+                        <ValidationMessage For="@(() => Item.Persona.Observaciones)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @*<div class="row">
+                <div class="col-sm-12 col-lg-2">
+                    <h4>Detalle</h4>
+                    <button class="btn btn-primary" @onclick="@(()=>CrearDetalle())"><span class="oi oi-plus" aria-hidden="true"></span></button>
+                </div>
+                <div class="col-sm-12 col-lg-10">
+                    <ListadoGenerico Listado="detalles">
+                        <NoHayRegistros>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha inicio</th>
+                                        <th>Categoría</th>
+                                        <th>Usuario</th>
+                                        <th>Precio hora</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <br />
+                            <text>No hay registros para mostrar</text>
+                        </NoHayRegistros>
+                        <HayRegistrosCompleto>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha inicio</th>
+                                        <th>Categoría</th>
+                                        <th>Usuario</th>
+                                        <th>Precio hora</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detalle in detalles.OrderBy(x => x.Categoria.Descripcion)
+                                     .ThenBy(x => x.Usuario.Nombre)
+                                     .ThenBy(x => x.Fecha))
+                                        {
+                                        <tr @onclick="@(()=>EditarDetalle(detalle))" style="cursor:pointer;">
+                                            <td>@detalle.Fecha.ToShortDateString()</td>
+                                            <td>@detalle.Categoria.Descripcion</td>
+                                            <td>@detalle.Usuario.Nombre</td>
+                                            <td>@detalle.ImporteHora.ToString("#,##0.00")</td>
+                                            <td><a @onclick="@(()=>detalles.Remove(detalle))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                                        </tr>
+                                        }
+                                </tbody>
+                            </table>
+                        </HayRegistrosCompleto>
+                    </ListadoGenerico>
+                </div>
+            </div>*@
+
+    <TabControl>
+        <TabPage Text="Direcciones">
+            <UbicacionesClientes Principal="Item.Persona.UbicacionPrincipal" Listado="Item.Persona.Ubicaciones" />
+        </TabPage>
+        <TabPage Text="Datos contacto">
+            <DatosContactoClientes Listado="Item.Persona.DatosContacto" />
+        </TabPage>
+        <TabPage Text="Contactos">
+            <ContactosClientes Listado="Item.Contactos" />
+        </TabPage>
+        <TabPage Text="Contratos">
+            <ContratosClientes Listado="Item.Contratos" />
+        </TabPage>
+        <TabPage Text="Márquetin">
+            <MarketingClientes Item="Item" />
+        </TabPage>
+    </TabControl>
+
+        <hr />
+        @*<button class="btn btn-primary" type="submit">Guardar</button>*@
+        <button class="btn btn-primary" @onclick="@Guardar"><span class="oi oi-hard-drive" aria-hidden="true"></span> Guardar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public ClienteDTO Item { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    //[CascadingParameter] public IModalService Modal { get; set; }
+
+    private bool inicializado = false;
+
+    private List<EmpresaDTOlist> empresas;
+    //private List<TarifaDetalleDTO> detalles;
+    //private List<CategoriaDTO> categorias;
+    //private List<UsuarioDTOlist> usuarios;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await CargarEmpresas();
+
+        //detalles = Item.Detalle.ToList();
+
+        //await CargarCategorias();
+        //await CargarUsuarios();
+
+        inicializado = true;
+    }
+
+    private async Task CargarEmpresas()
+    {
+        var httpResponse = await repositorio.Get<List<EmpresaDTOlist>>("api/empresas/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            empresas = httpResponse.Response;
+        }
+    }
+
+    //private async Task CargarCategorias()
+    //{
+    //    var httpResponse = await repositorio.Get<List<CategoriaDTO>>("api/categorias/lista");
+
+    //    if (httpResponse.Error)
+    //    {
+    //        await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+    //    }
+    //    else
+    //    {
+    //        categorias = httpResponse.Response;
+    //    }
+    //}
+
+    //private async Task CargarUsuarios()
+    //{
+    //    var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>("api/usuarios/lista");
+
+    //    if (httpResponse.Error)
+    //    {
+    //        await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+    //    }
+    //    else
+    //    {
+    //        usuarios = httpResponse.Response;
+    //    }
+    //}
+
+    //public async Task EditarDetalle(TarifaDetalleDTO detalle)
+    //{
+    //    var detalleUpdate = new TarifaDetalleDTO
+    //    {
+    //        Id = detalle.Id,
+    //        Categoria = new CategoriaDTOmin { Id = detalle.Categoria.Id },
+    //        Usuario = new UsuarioDTOmin { Id = detalle.Usuario.Id },
+    //        Activo = detalle.Activo,
+    //        ImporteHora = detalle.ImporteHora,
+    //        Fecha = detalle.Fecha
+    //    };
+
+    //    if (await ModalShow(detalleUpdate))
+    //    {
+    //        if (detalleUpdate.Categoria.Id == 0)
+    //        {
+    //            detalle.Categoria.Id = 0;
+    //            detalle.Categoria.Descripcion = "";
+    //        }
+    //        else
+    //        {
+    //            if (detalleUpdate.Categoria.Id != detalle.Categoria.Id)
+    //            {
+    //                detalle.Categoria.Id = detalleUpdate.Categoria.Id;
+    //                detalle.Categoria.Descripcion = BuscarDescripcionCategoria(detalleUpdate.Categoria.Id);
+    //            }
+    //        }
+
+    //        if (detalleUpdate.Usuario.Id == 0)
+    //        {
+    //            detalle.Usuario.Id = 0;
+    //            detalle.Usuario.Nombre = "";
+    //        }
+    //        else
+    //        {
+    //            if (detalleUpdate.Usuario.Id != detalle.Usuario.Id)
+    //            {
+    //                detalle.Usuario.Id = detalleUpdate.Usuario.Id;
+    //                detalle.Usuario.Nombre = BuscarNombreUsuario(detalleUpdate.Usuario.Id);
+    //            }
+    //        }
+
+    //        detalle.Activo = detalleUpdate.Activo;
+    //        detalle.ImporteHora = detalleUpdate.ImporteHora;
+    //        detalle.Fecha = detalleUpdate.Fecha;
+    //    }
+    //}
+
+    //private async Task CrearDetalle()
+    //{
+    //    var nuevoDetalle = new TarifaDetalleDTO
+    //    {
+    //        Fecha = DateTime.Today,
+    //        Categoria = new CategoriaDTOmin(),
+    //        Usuario = new UsuarioDTOmin()
+    //    };
+
+    //    if (await ModalShow(nuevoDetalle))
+    //    {
+    //        nuevoDetalle.Categoria.Descripcion = BuscarDescripcionCategoria(nuevoDetalle.Categoria.Id);
+    //        nuevoDetalle.Usuario.Nombre = BuscarNombreUsuario(nuevoDetalle.Usuario.Id);
+
+    //        detalles.Add(nuevoDetalle);
+    //    }
+    //}
+
+    //private async Task<bool> ModalShow(TarifaDetalleDTO detalle)
+    //{
+    //    var parameters = new ModalParameters();
+    //    parameters.Add(nameof(DetalleTarifa.Item), detalle);
+    //    parameters.Add(nameof(DetalleTarifa.Categorias), categorias);
+    //    parameters.Add(nameof(DetalleTarifa.Usuarios), usuarios);
+
+    //    var options = new ModalOptions()
+    //    {
+    //        HideCloseButton = true,
+    //        DisableBackgroundCancel = true,
+    //        HideHeader = true
+    //    };
+
+    //    var detalleModal = Modal.Show<DetalleTarifa>("", parameters, options);
+    //    var result = await detalleModal.Result;
+
+    //    return !result.Cancelled;
+    //}
+
+    private async Task Guardar()
+    {
+        //Item.Detalle.Clear();
+        //Item.Detalle.AddRange(detalles);
+
+        await OnValidSubmit.InvokeAsync();
+    }
+
+    //private string BuscarDescripcionCategoria(int id)
+    //{
+    //    if (id != 0)
+    //    {
+    //        return categorias.Find(x => x.Id == id)?.Descripcion;
+    //    }
+
+    //    return "";
+    //}
+
+    //private string BuscarNombreUsuario(int id)
+    //{
+    //    if (id != 0)
+    //    {
+    //        return usuarios.Find(x => x.Id == id)?.Nombre;
+    //    }
+
+    //    return "";
+    //}
+
+}

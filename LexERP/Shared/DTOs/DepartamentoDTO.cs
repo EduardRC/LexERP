@@ -34,7 +34,9 @@ namespace LexERP.Shared.DTOs
     public class DepartamentoDTOmin
     {
         public int Id { get; set; }
+        [StringLength(5)]
         public string Abreviatura { get; set; }
+        [StringLength(50)]
         public string Descripcion { get; set; }
         public bool Activo { get; set; }
     }

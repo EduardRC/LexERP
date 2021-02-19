@@ -6,15 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LexERP.Server.Models
+namespace LexERP.Shared.DTOs
 {
-    public class Persona : _comun
+    public class PersonaDTO
     {
-        public Persona()
+        public PersonaDTO()
         {
-            Ubicaciones = new HashSet<Ubicacion>();
-            Sectores = new HashSet<Sector>();
-            DatosContacto = new HashSet<DatoContacto>();
+            UbicacionPrincipal = new UbicacionDTO();
+            Ubicaciones = new List<UbicacionDTO>();
+            DatosContacto = new List<DatoContactoDTO>();
+            Sectores = new List<SectorDTO>();
+            Idioma = new IdiomaDTO();
         }
 
         public int Id { get; set; }
@@ -35,25 +37,21 @@ namespace LexERP.Server.Models
         [StringLength(80)]
         public string Cargo { get; set; }
 
-        public int? UbicacionPrincipalId { get; set; }
+        public UbicacionDTO UbicacionPrincipal { get; set; }
+        public IdiomaDTO Idioma { get; set; }
         public DateTime FechaNacimiento { get; set; }
-        public int IdiomaId { get; set; }
         public string Observaciones { get; set; }
 
-        public virtual Ubicacion UbicacionPrincipal { get; set; }
-        public virtual Idioma Idioma { get; set; }
-
-        public virtual ICollection<Ubicacion> Ubicaciones { get; set; }
-        public virtual ICollection<DatoContacto> DatosContacto { get; set; }
-        public virtual ICollection<Sector> Sectores { get; set; }
-
+        public List<UbicacionDTO> Ubicaciones { get; set; }
+        public List<DatoContactoDTO> DatosContacto { get; set; }
+        public List<SectorDTO> Sectores { get; set; }
 
         [Display(Name = "Nombre")]
         public string FullName
         {
             get
             {
-                if (Apellidos!="" && Nombre!="")
+                if (Apellidos != "" && Nombre != "")
                 {
                     return Apellidos + ", " + Nombre;
                 }
@@ -66,9 +64,18 @@ namespace LexERP.Server.Models
         {
             get
             {
-                return Nombre + " " + Apellidos;
+                return (Nombre + " " + Apellidos).Trim();
             }
         }
 
+        public bool Activo { get; set; }
+    }
+
+    public class PersonaDTOmin
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public string Cargo { get; set; }
+        public bool Activo { get; set; }
     }
 }
