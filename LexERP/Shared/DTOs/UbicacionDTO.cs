@@ -9,6 +9,11 @@ namespace LexERP.Shared.DTOs
 {
     public class UbicacionDTO
     {
+        public UbicacionDTO()
+        {
+            Pais = new PaisDTO();
+        }
+
         public int Id { get; set; }
 
         [StringLength(80)]

@@ -1,4 +1,7 @@
-﻿@if (!inicializado)
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+@if (!inicializado)
 {
     <Cargando />
 }
@@ -7,11 +10,23 @@ else
     <hr />
     <h5>
         <span class="oi oi-cart" aria-hidden="true"></span>
-        Marketing
+        Márquetin
     </h5>
 
     <div class="row">
-        <div class="col-sm-6">
+        @if (Item.Persona.Tipo == TipoPersona.Física)
+        {
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label>Fecha nacimiento:</label>
+                    <div>
+                        <InputDate class="form-control" @bind-Value="@Item.Persona.FechaNacimiento" />
+                        <ValidationMessage For="@(() => Item.Persona.FechaNacimiento)" />
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-sm-4">
             <div class="form-group">
                 <label>Número de empleados</label>
                 <div>
@@ -21,7 +36,7 @@ else
             </div>
 
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <div class="form-group">
                 <label>Volumen facturación:</label>
                 <div>
@@ -36,7 +51,7 @@ else
 
 
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-12 col-md-6">
             <ListadoGenerico Listado="Item.Persona.Sectores">
                 <NoHayRegistros>
                     <table class="table table-striped">
@@ -46,10 +61,9 @@ else
                             </tr>
                         </thead>
                     </table>
-                    <br />
                     <text>No hay registros para mostrar</text>
                 </NoHayRegistros>
-                <HayRegistros>
+                <HayRegistrosCompleto>
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -62,15 +76,25 @@ else
                                 {
                                 <tr>
                                     <td>@item.Descripcion</td>
-                                    <td><a @onclick="@(() => EliminarSector(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                                    <td><a @onclick="@(() => Item.Persona.Sectores.Remove(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                                 </tr>
                                 }
                         </tbody>
                     </table>
-                </HayRegistros>
+                </HayRegistrosCompleto>
             </ListadoGenerico>
+            <hr />
+            <div class="form-inline">
+                <button class="btn btn-primary" @onclick="AddSector"><span class="oi oi-plus" aria-hidden="true"></span></button>
+                <select class="form-control" @bind="@sectorId">
+                    @foreach (var item in ListaSectores.OrderBy(x => x.Descripcion))
+                    {
+                        <option value="@item.Id">@item.Descripcion</option>
+                    }
+                </select>
+            </div>
         </div>
-        <div class="col-sm-6">
+        <div class="col-12 col-md-6">
             <ListadoGenerico Listado="Item.Servicios">
                 <NoHayRegistros>
                     <table class="table table-striped">
@@ -80,10 +104,9 @@ else
                             </tr>
                         </thead>
                     </table>
-                    <br />
                     <text>No hay registros para mostrar</text>
                 </NoHayRegistros>
-                <HayRegistros>
+                <HayRegistrosCompleto>
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -96,44 +119,94 @@ else
                                 {
                                 <tr>
                                     <td>@item.Descripcion</td>
-                                    <td><a @onclick="@(() => EliminarServicio(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                                    <td><a @onclick="@(() => Item.Servicios.Remove(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                                 </tr>
                                 }
                         </tbody>
                     </table>
-                </HayRegistros>
+                </HayRegistrosCompleto>
             </ListadoGenerico>
+            <hr />
+            <div class="form-inline">
+                <button class="btn btn-primary" @onclick="AddServicio"><span class="oi oi-plus" aria-hidden="true"></span></button>
+                <select class="form-control" @bind="@servicioId">
+                    @foreach (var item in ListaServicios.OrderBy(x => x.Descripcion))
+                    {
+                        <option value="@item.Id">@item.Descripcion</option>
+                    }
+                </select>
+            </div>
         </div>
     </div>
-
-
 }
-
-
 
 @code {
     [Parameter] public ClienteDTO Item { get; set; }
+    [Parameter] public List<SectorDTO> ListaSectores { get; set; }
+    [Parameter] public List<ServicioDTO> ListaServicios { get; set; }
 
     private bool inicializado = false;
 
+    private int sectorId;
+    private int servicioId;
+
     protected async override Task OnInitializedAsync()
     {
+        if (ListaSectores == null)
+        {
+            await CargarSectores();
+        }
+
+        if (ListaServicios == null)
+        {
+            await CargarServicios();
+        }
+
         inicializado = true;
     }
 
-    private async Task AddItem()
+    private async Task CargarSectores()
     {
+        var httpResponse = await repositorio.Get<List<SectorDTO>>("api/sectores/lista");
 
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            ListaSectores = httpResponse.Response;
+        }
     }
 
-    private void EliminarSector(SectorDTO item)
+    private async Task CargarServicios()
     {
+        var httpResponse = await repositorio.Get<List<ServicioDTO>>("api/servicios/lista");
 
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            ListaServicios = httpResponse.Response;
+        }
     }
 
-    private void EliminarServicio(ServicioDTO item)
+    private void AddSector()
     {
+        if (sectorId != 0 && !Item.Persona.Sectores.Any(x=>x.Id == sectorId))
+        {
+            Item.Persona.Sectores.Add(new SectorDTO { Id = sectorId, Descripcion = ListaSectores.FirstOrDefault(x => x.Id == sectorId).Descripcion, Activo = true });
+        }
+    }
 
+    private void AddServicio()
+    {
+        if (servicioId != 0 && !Item.Servicios.Any(x=>x.Id==servicioId))
+        {
+            Item.Servicios.Add(new ServicioDTO { Id = servicioId, Descripcion = ListaServicios.FirstOrDefault(x => x.Id == servicioId).Descripcion, Activo = true });
+        }
     }
 
 }

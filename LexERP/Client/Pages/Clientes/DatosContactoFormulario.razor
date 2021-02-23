@@ -1,0 +1,65 @@
+﻿@if (Item == null)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item">
+        <DataAnnotationsValidator />
+
+        @if (Item.Id != 0)
+        {
+            <div class="col-sm-6">
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                        <ValidationMessage For="@(() => Item.Activo)" />
+                    </div>
+                    &nbsp; <label>Dato de contacto activo</label>
+                </div>
+
+            </div>
+        }
+
+        <div class="form-group">
+            <div>
+                <select class="form-control mb-2 mr-sm-2" @bind="@Item.TipoContacto.Id">
+                    @foreach (var tipo in Tipos.OrderBy(x=>x.Descripcion))
+                    {
+                        <option value="@tipo.Id">@tipo.Descripcion</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div>
+                <InputText class="form-control" @bind-Value="@Item.Valor" placeholder="Valor" />
+                <ValidationMessage For="@(() => Item.Valor)" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div>
+                <InputTextArea rows="8" class="form-control" @bind-Value="@Item.Observaciones" placeholder="Observaciones" />
+                <ValidationMessage For="@(() => Item.Observaciones)" />
+            </div>
+        </div>
+
+
+    </EditForm>
+
+    <hr />
+    <button @onclick="Aceptar" class="btn btn-primary"><span class="oi oi-circle-check" aria-hidden="true"></span> Aceptar</button>
+    <button @onclick="Cancelar" class="btn btn-secondary"><span class="oi oi-circle-x" aria-hidden="true"></span> Cancelar</button>
+}
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public DatoContactoDTO Item { get; set; }
+    [Parameter] public List<TipoContactoDTO> Tipos { get; set; }
+
+    async Task Aceptar() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task Cancelar() => await BlazoredModal.CancelAsync();
+}

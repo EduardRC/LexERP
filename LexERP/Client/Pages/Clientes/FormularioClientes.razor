@@ -106,17 +106,6 @@ else
                     </div>
                 </div>
 
-                @if (Item.Persona.Tipo == TipoPersona.Física)
-                {
-                    <div class="form-group">
-                        <label>Fecha nacimiento:</label>
-                        <div>
-                            <InputDate class="form-control" @bind-Value="@Item.Persona.FechaNacimiento" />
-                            <ValidationMessage For="@(() => Item.Persona.FechaNacimiento)" />
-                        </div>
-                    </div>
-                }
-
                 <div class="form-group">
                     <div>
                         <InputText class="form-control" @bind-Value="@Item.NombreComercial" placeholder="Nombre comercial" />
@@ -124,8 +113,66 @@ else
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.Codigo" placeholder="Código" />
+                                <ValidationMessage For="@(() => Item.Codigo)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.CodigoAlternativo" placeholder="Código Alternativo" />
+                                <ValidationMessage For="@(() => Item.CodigoAlternativo)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-
+                <div class="row">
+                    <div class="col-sm-12 col-md-4">
+                        <div class="form-group">
+                            <div>
+                                <label>Resp. Comercial</label>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.ResponsableComercial.Id">
+                                    @foreach (var persona in ResponsablesComerciales.OrderBy(x => x.Nombre))
+                                    {
+                                        <option value="@Item.ResponsableComercial.Id">@persona.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-4">
+                        <div class="form-group">
+                            <div>
+                                <label>Resp. Facturación</label>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.ResponsableFacturacion.Id">
+                                    @foreach (var persona in ResponsablesFacturacion.OrderBy(x => x.Nombre))
+                                    {
+                                        <option value="@Item.ResponsableFacturacion.Id">@persona.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-4">
+                        <div class="form-group">
+                            <div>
+                                <label>Captador</label>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.Captador.Id">
+                                    @foreach (var persona in Captadores.OrderBy(x => x.Nombre))
+                                    {
+                                        <option value="@Item.Captador.Id">@persona.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-sm-12 col-lg-4 col-xl-6">
                 <div class="form-group">
@@ -137,7 +184,6 @@ else
                 </div>
             </div>
         </div>
-
 
         @*<div class="row">
                 <div class="col-sm-12 col-lg-2">
@@ -191,23 +237,23 @@ else
                 </div>
             </div>*@
 
-    <TabControl>
-        <TabPage Text="Direcciones">
-            <UbicacionesClientes Principal="Item.Persona.UbicacionPrincipal" Listado="Item.Persona.Ubicaciones" />
-        </TabPage>
-        <TabPage Text="Datos contacto">
-            <DatosContactoClientes Listado="Item.Persona.DatosContacto" />
-        </TabPage>
-        <TabPage Text="Contactos">
-            <ContactosClientes Listado="Item.Contactos" />
-        </TabPage>
-        <TabPage Text="Contratos">
-            <ContratosClientes Listado="Item.Contratos" />
-        </TabPage>
-        <TabPage Text="Márquetin">
-            <MarketingClientes Item="Item" />
-        </TabPage>
-    </TabControl>
+        <TabControl>
+            <TabPage Text="Direcciones">
+                <UbicacionesClientes Item="Item" ListaPaises="paises" />
+            </TabPage>
+            <TabPage Text="Datos contacto">
+                <DatosContactoClientes Listado="Item.Persona.DatosContacto" Tipos="tiposContacto" />
+            </TabPage>
+            <TabPage Text="Contactos">
+                <ContactosClientes Listado="Item.Contactos" />
+            </TabPage>
+            <TabPage Text="Contratos">
+                <ContratosClientes Listado="Item.Contratos" />
+            </TabPage>
+            <TabPage Text="Márquetin">
+                <MarketingClientes Item="Item" />
+            </TabPage>
+        </TabControl>
 
         <hr />
         @*<button class="btn btn-primary" type="submit">Guardar</button>*@
@@ -217,6 +263,9 @@ else
 
 @code {
     [Parameter] public ClienteDTO Item { get; set; }
+    [Parameter] public List<UsuarioDTOlist> ResponsablesComerciales { get; set; }
+    [Parameter] public List<UsuarioDTOlist> ResponsablesFacturacion { get; set; }
+    [Parameter] public List<UsuarioDTOlist> Captadores { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
 
     //[CascadingParameter] public IModalService Modal { get; set; }
@@ -224,6 +273,8 @@ else
     private bool inicializado = false;
 
     private List<EmpresaDTOlist> empresas;
+    private List<TipoContactoDTO> tiposContacto;
+    private List<PaisDTO> paises;
     //private List<TarifaDetalleDTO> detalles;
     //private List<CategoriaDTO> categorias;
     //private List<UsuarioDTOlist> usuarios;
@@ -231,6 +282,23 @@ else
     protected async override Task OnInitializedAsync()
     {
         await CargarEmpresas();
+        await CargarTiposContacto();
+        await CargarPaises();
+
+        if (ResponsablesComerciales == null)
+        {
+            await CargarResponsablesComerciales();
+        }
+
+        if (ResponsablesFacturacion == null)
+        {
+            await CargarResponsablesFacturacion();
+        }
+
+        if (Captadores == null)
+        {
+            await CargarCaptadores();
+        }
 
         //detalles = Item.Detalle.ToList();
 
@@ -253,6 +321,98 @@ else
             empresas = httpResponse.Response;
         }
     }
+
+    private async Task CargarTiposContacto()
+    {
+        var httpResponse = await repositorio.Get<List<TipoContactoDTO>>("api/tiposcontacto/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            tiposContacto = httpResponse.Response;
+        }
+    }
+
+    private async Task CargarPaises()
+    {
+        var httpResponse = await repositorio.Get<List<PaisDTO>>("api/paises/lista");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            paises = httpResponse.Response;
+        }
+    }
+
+    private async Task CargarResponsablesComerciales()
+    {
+        int id = 0;
+        if (Item.ResponsableComercial != null)
+        {
+            id = Item.ResponsableComercial.Id;
+        }
+
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios/respcomercial/{id}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            ResponsablesComerciales = httpResponse.Response;
+            ResponsablesComerciales.Add(new UsuarioDTOlist { Id = 0, Nombre = "" });
+        }
+    }
+
+    private async Task CargarResponsablesFacturacion()
+    {
+        int id = 0;
+        if (Item.ResponsableFacturacion != null)
+        {
+            id = Item.ResponsableFacturacion.Id;
+        }
+
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios/respfacturacion/{id}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            ResponsablesFacturacion = httpResponse.Response;
+            ResponsablesFacturacion.Add(new UsuarioDTOlist { Id = 0, Nombre = "" });
+        }
+    }
+
+    private async Task CargarCaptadores()
+    {
+        int id = 0;
+        if (Item.Captador != null)
+        {
+            id = Item.Captador.Id;
+        }
+
+        var httpResponse = await repositorio.Get<List<UsuarioDTOlist>>($"api/usuarios/captadores/{id}");
+
+        if (httpResponse.Error)
+        {
+            await mostrarMensajes.MostrarMensajeError(await httpResponse.GetBody());
+        }
+        else
+        {
+            Captadores = httpResponse.Response;
+            Captadores.Add(new UsuarioDTOlist { Id = 0, Nombre = "" });
+        }
+    }
+
 
     //private async Task CargarCategorias()
     //{

@@ -159,6 +159,67 @@ namespace LexERP.Server.Controllers
                 }).ToListAsync();
         }
 
+        [HttpGet("respexpediente")]
+        [HttpGet("respexpediente/{id}")]
+        public async Task<ActionResult<List<UsuarioDTOlist>>> ResponsableExpediente(int id = 0)
+        {
+            return await _context.Users
+                .Where(x => x.EsResponsableExpediente && x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Apellidos).ThenBy(x => x.Nombre)
+                .Select(x => new UsuarioDTOlist
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName,
+                    Activo = x.Activo
+                }).ToListAsync();
+        }
+
+        [HttpGet("respcomercial")]
+        [HttpGet("respcomercial/{id}")]
+        public async Task<ActionResult<List<UsuarioDTOlist>>> ResponsableComercial(int id=0)
+        {
+            return await _context.Users
+                .Where(x => x.EsResponsableComercial && x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Apellidos).ThenBy(x => x.Nombre)
+                .Select(x => new UsuarioDTOlist
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName,
+                    Activo = x.Activo
+                }).ToListAsync();
+        }
+
+        [HttpGet("respfacturacion")]
+        [HttpGet("respfacturacion/{id}")]
+        public async Task<ActionResult<List<UsuarioDTOlist>>> ResponsableFacturacion(int id = 0)
+        {
+            return await _context.Users
+                .Where(x => x.EsResponsableFacturacion && x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Apellidos).ThenBy(x => x.Nombre)
+                .Select(x => new UsuarioDTOlist
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName,
+                    Activo = x.Activo
+                }).ToListAsync();
+        }
+
+        [HttpGet("captadores")]
+        [HttpGet("captadores/{id}")]
+        public async Task<ActionResult<List<UsuarioDTOlist>>> Captadores(int id = 0)
+        {
+            return await _context.Users
+                .Where(x => x.EsCaptadorComisionista && x.Eliminado == false && (x.Activo == true || x.Id == id))
+                .OrderBy(x => x.Apellidos).ThenBy(x => x.Nombre)
+                .Select(x => new UsuarioDTOlist
+                {
+                    Id = x.Id,
+                    Nombre = x.FullName,
+                    Activo = x.Activo
+                }).ToListAsync();
+        }
+
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

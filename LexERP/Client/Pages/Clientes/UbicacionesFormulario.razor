@@ -1,0 +1,92 @@
+﻿@if (Item == null)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <div>
+                <InputText class="form-control" @bind-Value="@Item.Descripcion" placeholder="Descripción" />
+                <ValidationMessage For="@(() => Item.Descripcion)" />
+            </div>
+        </div>
+
+        @if (Item.Id != 0)
+        {
+            <div class="col-sm-6">
+                <div class="form-inline">
+                    <div>
+                        <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                        <ValidationMessage For="@(() => Item.Activo)" />
+                    </div>
+                    &nbsp; <label>Dirección activa</label>
+                </div>
+
+            </div>
+        }
+
+        <hr />
+        <div class="form-group">
+            <div>
+                <InputText class="form-control" @bind-Value="@Item.Direccion" placeholder="Dirección" />
+                <ValidationMessage For="@(() => Item.Direccion)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <InputText class="form-control" @bind-Value="@Item.Poblacion" placeholder="Población" />
+                <ValidationMessage For="@(() => Item.Poblacion)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.CodigoPostal" placeholder="Codigo Postal" />
+                        <ValidationMessage For="@(() => Item.CodigoPostal)" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-9">
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Provincia" placeholder="Provincia" />
+                        <ValidationMessage For="@(() => Item.Provincia)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <select class="form-control mb-2 mr-sm-2" @bind="@Item.Pais.Id">
+                    @foreach (var pais in ListaPaises)
+                    {
+                        <option value="@pais.Id">@pais.Nombre</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                <InputTextArea rows="3" class="form-control" @bind-Value="@Item.Observaciones" placeholder="Observaciones" />
+                <ValidationMessage For="@(() => Item.Observaciones)" />
+            </div>
+        </div>
+    </EditForm>
+    <hr />
+    <button @onclick="Aceptar" class="btn btn-primary"><span class="oi oi-circle-check" aria-hidden="true"></span> Aceptar</button>
+    <button @onclick="Cancelar" class="btn btn-secondary"><span class="oi oi-circle-x" aria-hidden="true"></span> Cancelar</button>
+}
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public UbicacionDTO Item { get; set; }
+    [Parameter] public List<PaisDTO> ListaPaises { get; set; }
+
+    async Task Aceptar() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task Cancelar() => await BlazoredModal.CancelAsync();
+}

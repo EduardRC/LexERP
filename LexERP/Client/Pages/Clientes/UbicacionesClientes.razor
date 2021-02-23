@@ -1,4 +1,7 @@
-﻿@if (Principal == null || Listado == null)
+﻿@inject IRepositorio repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+@if (Item == null || ListaPaises == null)
 {
     <Cargando />
 }
@@ -13,38 +16,48 @@ else
             </h5>
             <div class="form-group">
                 <div>
-                    <InputText class="form-control" @bind-Value="@Principal.Direccion" placeholder="Dirección" />
-                    <ValidationMessage For="@(() => Principal.Direccion)" />
+                    <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Direccion" placeholder="Dirección" />
+                    <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Direccion)" />
                 </div>
             </div>
             <div class="form-group">
                 <div>
-                    <InputText class="form-control" @bind-Value="@Principal.Poblacion" placeholder="Población" />
-                    <ValidationMessage For="@(() => Principal.Poblacion)" />
+                    <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Poblacion" placeholder="Población" />
+                    <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Poblacion)" />
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-3">
                     <div class="form-group">
                         <div>
-                            <InputText class="form-control" @bind-Value="@Principal.CodigoPostal" placeholder="Codigo Postal" />
-                            <ValidationMessage For="@(() => Principal.CodigoPostal)" />
+                            <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.CodigoPostal" placeholder="Codigo Postal" />
+                            <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.CodigoPostal)" />
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-9">
                     <div class="form-group">
                         <div>
-                            <InputText class="form-control" @bind-Value="@Principal.Provincia" placeholder="Provincia" />
-                            <ValidationMessage For="@(() => Principal.Provincia)" />
+                            <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Provincia" placeholder="Provincia" />
+                            <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Provincia)" />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <div>
-                    <InputTextArea rows="3" class="form-control" @bind-Value="@Principal.Observaciones" placeholder="Observaciones" />
-                    <ValidationMessage For="@(() => Principal.Observaciones)" />
+                    <select class="form-control mb-2 mr-sm-2" @bind="@Item.Persona.UbicacionPrincipal.Pais.Id">
+                        @foreach (var pais in ListaPaises)
+                        {
+                            <option value="@pais.Id">@pais.Nombre</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <InputTextArea rows="3" class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Observaciones" placeholder="Observaciones" />
+                    <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Observaciones)" />
                 </div>
             </div>
 
@@ -55,12 +68,13 @@ else
                 Direcciones Alternativas
                 &nbsp; <button class="btn btn-primary" @onclick="@(()=>AddItem())"><span class="oi oi-plus" aria-hidden="true"></span></button>
             </h5>
-            <ListadoGenerico Listado="Listado">
+            <ListadoGenerico Listado="Item.Persona.Ubicaciones">
                 <NoHayRegistros>
                     <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Descripción</th>
+                                <th>Dirección</th>
                                 <th>Población</th>
                             </tr>
                         </thead>
@@ -68,28 +82,31 @@ else
                     <br />
                     <text>No hay registros para mostrar</text>
                 </NoHayRegistros>
-                <HayRegistros>
+                <HayRegistrosCompleto>
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>Descripción</th>
+                                <th>Dirección</th>
                                 <th>Población</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Listado)
+                            @foreach (var item in Item.Persona.Ubicaciones)
                                 {
-                                <tr @onclick="@(()=>EditarDetalle(item))" style="cursor:pointer;">
+                                <tr @onclick="@(()=>EditItem(item))" style="cursor:pointer;">
+                                    <td><a @onclick="@(()=>ConvetirEnPrincipal(item))" @onclick:stopPropagation="true"><Tooltip Text="Convertir esta dirección en principal"><span class="oi oi-star" aria-hidden="true"></span></Tooltip></a></td>
                                     <td>@item.Descripcion</td>
+                                    <td>@item.Direccion</td>
                                     <td>@item.Poblacion</td>
-                                    <td><a @onclick="@(()=>ConvetirEnPrincipal(item))" @onclick:stopPropagation="true"><span class="oi oi-star" aria-hidden="true"></span></a></td>
+                                    <td><a @onclick="@(()=>Item.Persona.Ubicaciones.Remove(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                                 </tr>
                                 }
                         </tbody>
                     </table>
-
-                </HayRegistros>
+                </HayRegistrosCompleto>
             </ListadoGenerico>
         </div>
     </div>
@@ -97,21 +114,72 @@ else
 }
 
 @code {
-    [Parameter] public UbicacionDTO Principal { get; set; }
-    [Parameter] public List<UbicacionDTO> Listado { get; set; }
+    [Parameter] public ClienteDTO Item { get; set; }
+    [Parameter] public List<PaisDTO> ListaPaises { get; set; }
+
+    [CascadingParameter] public IModalService Modal { get; set; }
 
     private async Task AddItem()
     {
+        var nuevaUbicacion = new UbicacionDTO();
 
+        if (await ModalShow(nuevaUbicacion))
+        {
+            Item.Persona.Ubicaciones.Add(nuevaUbicacion);
+        }
     }
 
-    private void EditarDetalle(UbicacionDTO ubicacion)
+    private async Task EditItem(UbicacionDTO ubicacion)
     {
+        var ubicacionUpdate = new UbicacionDTO
+        {
+            Id = ubicacion.Id,
+            Activo = ubicacion.Activo,
+            Descripcion = ubicacion.Descripcion,
+            Direccion = ubicacion.Direccion,
+            Poblacion = ubicacion.Poblacion,
+            CodigoPostal = ubicacion.CodigoPostal,
+            Provincia = ubicacion.Provincia,
+            Pais = new PaisDTO { Id = ubicacion.Pais.Id },
+            Observaciones = ubicacion.Observaciones
+        };
 
+        if (await ModalShow(ubicacionUpdate))
+        {
+            ubicacion.Activo = ubicacionUpdate.Activo;
+            ubicacion.Descripcion = ubicacionUpdate.Descripcion;
+            ubicacion.Direccion = ubicacionUpdate.Direccion;
+            ubicacion.Poblacion = ubicacionUpdate.Poblacion;
+            ubicacion.CodigoPostal = ubicacionUpdate.CodigoPostal;
+            ubicacion.Provincia = ubicacionUpdate.Provincia;
+            ubicacion.Pais = ubicacionUpdate.Pais;
+            ubicacion.Observaciones = ubicacionUpdate.Observaciones;
+        }
+    }
+
+    private async Task<bool> ModalShow(UbicacionDTO ubicacion)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(UbicacionesFormulario.Item), ubicacion);
+        parameters.Add(nameof(UbicacionesFormulario.ListaPaises), ListaPaises);
+
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var ubicacionModal = Modal.Show<UbicacionesFormulario>("", parameters, options);
+        var result = await ubicacionModal.Result;
+
+        return !result.Cancelled;
     }
 
     private void ConvetirEnPrincipal(UbicacionDTO ubicacion)
     {
-
+        Item.Persona.Ubicaciones.Add(Item.Persona.UbicacionPrincipal);
+        Item.Persona.UbicacionPrincipal = ubicacion;
+        Item.Persona.Ubicaciones.Remove(ubicacion);
     }
 }

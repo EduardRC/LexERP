@@ -1,4 +1,4 @@
-﻿@if (Listado == null)
+﻿@if (Listado == null || Tipos == null)
 {
     <Cargando />
 }
@@ -18,51 +18,91 @@ else
                     <tr>
                         <th>Descripción</th>
                         <th>Valor</th>
+                        <th>Observaciones</th>
                     </tr>
                 </thead>
             </table>
             <br />
             <text>No hay registros para mostrar</text>
         </NoHayRegistros>
-        <HayRegistros>
+        <HayRegistrosCompleto>
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Descripción</th>
                         <th>Valor</th>
+                        <th>Observaciones</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Listado.OrderBy(x => x.TipoContacto.Clase))
                         {
-                        <tr @onclick="@(() => EditarDetalle(item))" style="cursor:pointer;">
-                            <td>@item.TipoContacto.Descripcion</td>
+                        <tr @onclick="@(() => EditItem(item))" style="cursor:pointer;">
+                            <td>@Tipos.FirstOrDefault(x=>x.Id==item.TipoContacto.Id).Descripcion</td>
                             <td>@item.Valor</td>
-                            <td><a @onclick="@(() => Eliminar(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                            <td>@item.Observaciones</td>
+                            <td><a @onclick="@(() => Listado.Remove(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                         </tr>
                         }
                 </tbody>
             </table>
-        </HayRegistros>
+        </HayRegistrosCompleto>
     </ListadoGenerico>
 }
 
 @code {
     [Parameter] public List<DatoContactoDTO> Listado { get; set; }
+    [Parameter] public List<TipoContactoDTO> Tipos { get; set; }
 
-    private void AddItem()
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private async Task AddItem()
     {
+        var nuevoDatoContacto = new DatoContactoDTO();
 
+        if (await ModalShow(nuevoDatoContacto))
+        {
+            Listado.Add(nuevoDatoContacto);
+        }
     }
 
-    private void Eliminar(DatoContactoDTO item)
+    private async Task EditItem(DatoContactoDTO datoContacto)
     {
+        var DatoContactoDTOUpdate = new DatoContactoDTO
+        {
+            Id = datoContacto.Id,
+            Activo = datoContacto.Activo,
+            TipoContacto = new TipoContactoDTO {Id=datoContacto.TipoContacto.Id },
+            Valor = datoContacto.Valor,
+            Observaciones = datoContacto.Observaciones
+        };
 
+        if (await ModalShow(DatoContactoDTOUpdate))
+        {
+            datoContacto.Activo = DatoContactoDTOUpdate.Activo;
+            datoContacto.TipoContacto.Id = DatoContactoDTOUpdate.TipoContacto.Id;
+            datoContacto.Valor = DatoContactoDTOUpdate.Valor;
+            datoContacto.Observaciones = DatoContactoDTOUpdate.Observaciones;
+        }
     }
 
-    private void EditarDetalle(DatoContactoDTO item)
+    private async Task<bool> ModalShow(DatoContactoDTO datoContacto)
     {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(DatosContactoFormulario.Item), datoContacto);
+        parameters.Add(nameof(DatosContactoFormulario.Tipos), Tipos);
 
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var datoContactoModal = Modal.Show<DatosContactoFormulario>("", parameters, options);
+        var result = await datoContactoModal.Result;
+
+        return !result.Cancelled;
     }
 }

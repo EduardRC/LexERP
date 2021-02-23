@@ -1,0 +1,11 @@
+﻿<h3>ContactosFormulario</h3>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public PersonaDTO Item { get; set; }
+    [Parameter] public List<PaisDTO> ListaPaises { get; set; }
+
+    async Task Aceptar() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task Cancelar() => await BlazoredModal.CancelAsync();
+}
