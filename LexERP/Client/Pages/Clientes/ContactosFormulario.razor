@@ -1,10 +1,183 @@
-﻿<h3>ContactosFormulario</h3>
+﻿@if (Item == null)
+{
+    <Cargando />
+}
+else
+{
+    <EditForm Model="Item">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="row">
+                    @if (Item.Id != 0)
+                    {
+                        <div class="col-sm-6">
+                            <div class="form-inline">
+                                <div>
+                                    <InputCheckbox class="form-control" @bind-Value="@Item.Activo" />
+                                    <ValidationMessage For="@(() => Item.Activo)" />
+                                </div>
+                                &nbsp; <label>Contacto activo</label>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.Tipo">
+                                    @foreach (var clase in Enum.GetValues(typeof(TipoPersona)))
+                                    {
+                                        <option value="@clase">Persona @clase</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control"
+                                           @bind-Value="@Item.Documento"
+                                           placeholder=@((Item.Tipo == TipoPersona.Física)?"NIF":"CIF") />
+                                <ValidationMessage For="@(() => Item.Documento)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        @if (Item.Tipo == TipoPersona.Física)
+                        {
+                            <Tooltip Text="Fecha de nacimiento">
+                                <div class="form-group">
+                                    <div>
+                                        <InputDate class="form-control" @bind-Value="@Item.FechaNacimiento" />
+                                        <ValidationMessage For="@(() => Item.FechaNacimiento)" />
+                                    </div>
+                                </div>
+                            </Tooltip>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Cargo" placeholder="Cargo" />
+                        <ValidationMessage For="@(() => Item.Cargo)" />
+                    </div>
+                </div>
+
+                @if (Item.Tipo == TipoPersona.Física)
+                {
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <div>
+                                    <InputText class="form-control" @bind-Value="@Item.Saludo" placeholder="Saludo" />
+                                    <ValidationMessage For="@(() => Item.Saludo)" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="form-group">
+                                <div>
+                                    <InputText class="form-control" @bind-Value="@Item.Nombre" placeholder="Nombre" />
+                                    <ValidationMessage For="@(() => Item.Nombre)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.Apellidos"
+                                   placeholder=@((Item.Tipo == TipoPersona.Física)?"Apellidos":"Razón social") />
+                        <ValidationMessage For="@(() => Item.Apellidos)" />
+                    </div>
+                </div>
+
+
+
+                <hr />
+
+
+                <div class="form-group">
+                    <div>
+                        <InputText class="form-control" @bind-Value="@Item.UbicacionPrincipal.Direccion" placeholder="Dirección" />
+                        <ValidationMessage For="@(() => Item.UbicacionPrincipal.Direccion)" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.UbicacionPrincipal.CodigoPostal" placeholder="Codigo Postal" />
+                                <ValidationMessage For="@(() => Item.UbicacionPrincipal.CodigoPostal)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-10">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.UbicacionPrincipal.Poblacion" placeholder="Población" />
+                                <ValidationMessage For="@(() => Item.UbicacionPrincipal.Poblacion)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.UbicacionPrincipal.Provincia" placeholder="Provincia" />
+                                <ValidationMessage For="@(() => Item.UbicacionPrincipal.Provincia)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.UbicacionPrincipal.Pais.Id">
+                                    @foreach (var pais in ListaPaises)
+                                    {
+                                        <option value="@pais.Id">@pais.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Observaciones:</label>
+                    <div>
+                        <InputTextArea rows="4" class="form-control" @bind-Value="@Item.Observaciones" />
+                        <ValidationMessage For="@(() => Item.Observaciones)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+    <DatosContactoClientes Listado="Item.DatosContacto" Tipos="TiposContactos" />
+    <hr />
+    <button @onclick="Aceptar" class="btn btn-primary"><span class="oi oi-circle-check" aria-hidden="true"></span> Aceptar</button>
+    <button @onclick="Cancelar" class="btn btn-secondary"><span class="oi oi-circle-x" aria-hidden="true"></span> Cancelar</button>
+}
+
 
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
 
     [Parameter] public PersonaDTO Item { get; set; }
     [Parameter] public List<PaisDTO> ListaPaises { get; set; }
+    [Parameter] public List<TipoContactoDTO> TiposContactos { get; set; }
 
     async Task Aceptar() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
     async Task Cancelar() => await BlazoredModal.CancelAsync();

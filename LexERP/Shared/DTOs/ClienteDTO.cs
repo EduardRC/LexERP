@@ -18,8 +18,8 @@ namespace LexERP.Shared.DTOs
             Parent = new ClienteDTOmin();
             Children = new List<ClienteDTOmin>();
             Servicios = new List<ServicioDTO>();
-            Contactos = new List<PersonaDTOmin>();
-            Contratos = new List<ContratoDTOmin>();
+            Contactos = new List<PersonaDTO>();
+            Contratos = new List<ContratoDTO>();
         }
 
         public int Id { get; set; }
@@ -56,8 +56,8 @@ namespace LexERP.Shared.DTOs
 
         public List<ClienteDTOmin> Children { get; set; }
         public List<ServicioDTO> Servicios { get; set; }
-        public List<PersonaDTOmin> Contactos { get; set; }
-        public List<ContratoDTOmin> Contratos { get; set; }
+        public List<PersonaDTO> Contactos { get; set; }
+        public List<ContratoDTO> Contratos { get; set; }
         //public virtual ICollection<Factura> Facturas { get; set; }
 
         public bool Activo { get; set; }

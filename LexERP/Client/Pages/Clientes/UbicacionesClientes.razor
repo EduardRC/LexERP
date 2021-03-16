@@ -20,12 +20,7 @@ else
                     <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Direccion)" />
                 </div>
             </div>
-            <div class="form-group">
-                <div>
-                    <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Poblacion" placeholder="Población" />
-                    <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Poblacion)" />
-                </div>
-            </div>
+
             <div class="row">
                 <div class="col-sm-3">
                     <div class="form-group">
@@ -38,31 +33,45 @@ else
                 <div class="col-sm-9">
                     <div class="form-group">
                         <div>
-                            <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Provincia" placeholder="Provincia" />
-                            <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Provincia)" />
+                            <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Poblacion" placeholder="Población" />
+                            <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Poblacion)" />
                         </div>
                     </div>
                 </div>
+
             </div>
-            <div class="form-group">
-                <div>
-                    <select class="form-control mb-2 mr-sm-2" @bind="@Item.Persona.UbicacionPrincipal.Pais.Id">
-                        @foreach (var pais in ListaPaises)
-                        {
-                            <option value="@pais.Id">@pais.Nombre</option>
-                        }
-                    </select>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <div>
+                                <InputText class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Provincia" placeholder="Provincia" />
+                                <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Provincia)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div>
+                                <select class="form-control mb-2 mr-sm-2" @bind="@Item.Persona.UbicacionPrincipal.Pais.Id">
+                                    @foreach (var pais in ListaPaises)
+                                    {
+                                        <option value="@pais.Id">@pais.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <div>
-                    <InputTextArea rows="3" class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Observaciones" placeholder="Observaciones" />
-                    <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Observaciones)" />
+
+                <div class="form-group">
+                    <div>
+                        <InputTextArea rows="3" class="form-control" @bind-Value="@Item.Persona.UbicacionPrincipal.Observaciones" placeholder="Observaciones" />
+                        <ValidationMessage For="@(() => Item.Persona.UbicacionPrincipal.Observaciones)" />
+                    </div>
                 </div>
-            </div>
 
 
-        </div>
+            </div>
         <div class="col-sm-12 col-md-6">
             <h5>
                 Direcciones Alternativas

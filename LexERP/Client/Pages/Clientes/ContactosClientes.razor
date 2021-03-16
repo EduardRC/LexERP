@@ -24,7 +24,7 @@ else
             <br />
             <text>No hay registros para mostrar</text>
         </NoHayRegistros>
-        <HayRegistros>
+        <HayRegistrosCompleto>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -38,31 +38,129 @@ else
                         {
                         <tr @onclick="@(() => EditarDetalle(item))" style="cursor:pointer;">
                             <td>@item.Cargo</td>
-                            <td>@item.Nombre</td>
-                            <td><a @onclick="@(() => Eliminar(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
+                            <td>@item.FullName</td>
+                            <td><a @onclick="@(() => Listado.Remove(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                         </tr>
                         }
                 </tbody>
             </table>
-        </HayRegistros>
+        </HayRegistrosCompleto>
     </ListadoGenerico>
 }
 
 @code {
-    [Parameter] public List<PersonaDTOmin> Listado { get; set; }
+    //[Parameter] public List<PersonaDTOmin> Listado2 { get; set; }
+    [Parameter] public List<PersonaDTO> Listado { get; set; }
+    [Parameter] public List<PaisDTO> ListaPaises { get; set; }
+    [Parameter] public List<TipoContactoDTO> TiposContactos { get; set; }
+
+
+    [CascadingParameter] public IModalService Modal { get; set; }
 
     private async Task AddItem()
     {
+        var nuevoContacto = new PersonaDTO();
 
+        if (await ModalShow(nuevoContacto))
+        {
+            if (nuevoContacto.Tipo != TipoPersona.Física)
+            {
+                nuevoContacto.Nombre = "";
+            }
+
+            Listado.Add(nuevoContacto);
+        }
     }
 
-    private void Eliminar(PersonaDTOmin item)
+    private async Task EditarDetalle(PersonaDTO item)
     {
+        // Copiado datos a una variable temporal, ya que si se asigna directamente a contactoDTOUpdate
+        // estos dos valores de ubicacion y datosContacto se pasan por referencia y se modican aunque al final se de a cancelar
 
+        var ubicacion = new UbicacionDTO
+        {
+            Id = item.UbicacionPrincipal.Id,
+            Direccion = item.UbicacionPrincipal.Direccion,
+            Poblacion = item.UbicacionPrincipal.Poblacion,
+            CodigoPostal = item.UbicacionPrincipal.CodigoPostal,
+            Provincia = item.UbicacionPrincipal.Provincia,
+            Pais = new PaisDTO { Id = item.UbicacionPrincipal.Pais.Id }
+        };
+
+        var datosContacto = new List<DatoContactoDTO>();
+        foreach (var dato in item.DatosContacto)
+        {
+            datosContacto.Add(new DatoContactoDTO
+            {
+                Id = dato.Id,
+                TipoContacto = dato.TipoContacto,
+                Valor = dato.Valor,
+                Observaciones = dato.Observaciones,
+                Activo = dato.Activo
+            });
+        }
+
+        // Asignar variables que se pasaran al Modal para la consulta/edición
+        var contactoDTOUpdate = new PersonaDTO
+        {
+            Id = item.Id,
+            Activo = item.Activo,
+            Tipo = item.Tipo,
+            Documento = item.Documento,
+            Saludo = item.Saludo,
+            Nombre = item.Nombre,
+            Apellidos = item.Apellidos,
+            Cargo = item.Cargo,
+            UbicacionPrincipal = ubicacion,
+            Idioma = item.Idioma,
+            FechaNacimiento = item.FechaNacimiento,
+            DatosContacto = datosContacto,
+            Observaciones = item.Observaciones
+        };
+
+        if (await ModalShow(contactoDTOUpdate))
+        {
+            item.Activo = contactoDTOUpdate.Activo;
+            item.Tipo = contactoDTOUpdate.Tipo;
+            item.Documento = contactoDTOUpdate.Documento;
+            item.Saludo = contactoDTOUpdate.Saludo;
+
+            if (item.Tipo == TipoPersona.Física)
+            {
+                item.Nombre = contactoDTOUpdate.Nombre;
+            }
+            else
+            {
+                item.Nombre = "";
+            }
+
+            item.Apellidos = contactoDTOUpdate.Apellidos;
+            item.Cargo = contactoDTOUpdate.Cargo;
+            item.UbicacionPrincipal = contactoDTOUpdate.UbicacionPrincipal;
+            item.Idioma = contactoDTOUpdate.Idioma;
+            item.FechaNacimiento = contactoDTOUpdate.FechaNacimiento;
+            item.DatosContacto = contactoDTOUpdate.DatosContacto;
+            item.Observaciones = contactoDTOUpdate.Observaciones;
+        }
     }
 
-    private void EditarDetalle(PersonaDTOmin item)
+    private async Task<bool> ModalShow(PersonaDTO contacto)
     {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ContactosFormulario.Item), contacto);
+        parameters.Add(nameof(ContactosFormulario.ListaPaises), ListaPaises);
+        parameters.Add(nameof(ContactosFormulario.TiposContactos), TiposContactos);
 
+        var options = new ModalOptions()
+        {
+            HideCloseButton = true,
+            DisableBackgroundCancel = true,
+            HideHeader = true
+        };
+
+        var datoContactoModal = Modal.Show<ContactosFormulario>("", parameters, options);
+        var result = await datoContactoModal.Result;
+
+        return !result.Cancelled;
     }
 }

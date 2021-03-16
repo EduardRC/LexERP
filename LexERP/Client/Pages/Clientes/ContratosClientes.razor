@@ -37,7 +37,7 @@ else
                     @foreach (var item in Listado)
                         {
                         <tr @onclick="@(() => EditarDetalle(item))" style="cursor:pointer;">
-                            <td>@item.TipoContrato</td>
+                   @*         <td>@item.TipoContrato</td>*@
                             <td>@item.Descripcion</td>
                             <td><a @onclick="@(() => Eliminar(item))" @onclick:stopPropagation="true"><span class="oi oi-trash" aria-hidden="true"></span></a></td>
                         </tr>
@@ -49,19 +49,19 @@ else
 }
 
 @code {
-    [Parameter] public List<ContratoDTOmin> Listado { get; set; }
+    [Parameter] public List<ContratoDTO> Listado { get; set; }
 
     private async Task AddItem()
     {
 
     }
 
-    private void Eliminar(ContratoDTOmin item)
+    private void Eliminar(ContratoDTO item)
     {
 
     }
 
-    private void EditarDetalle(ContratoDTOmin item)
+    private void EditarDetalle(ContratoDTO item)
     {
 
     }

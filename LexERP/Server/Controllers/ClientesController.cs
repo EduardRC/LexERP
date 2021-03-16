@@ -140,7 +140,24 @@ namespace LexERP.Server.Controllers
 
             foreach (var item in element.Contactos.Where(x => x.Eliminado == false))
             {
-                cliente.Contactos.Add(new PersonaDTOmin{ Id = item.Id, Nombre=item.FullName, Cargo=item.Cargo, Activo = item.Activo });
+                cliente.Contactos.Add(new PersonaDTO 
+                { 
+                    Id = item.Id,
+                    Activo = item.Activo,
+                    Tipo = item.Tipo,
+                    Documento = item.Documento,
+                    Saludo = item.Saludo,
+                    Nombre = item.Nombre, 
+                    Apellidos=item.Apellidos, 
+                    Cargo=item.Cargo, 
+
+                    UbicacionPrincipal = new UbicacionDTO { },
+                    Idioma = new IdiomaDTO { Id = item.IdiomaId },
+                    FechaNacimiento = item.FechaNacimiento,
+                    DatosContacto = new List<DatoContactoDTO> { },
+
+                    Observaciones = item.Observaciones
+                });
             }
 
             foreach (var item in element.Persona.Sectores.Where(x => x.Eliminado == false))
